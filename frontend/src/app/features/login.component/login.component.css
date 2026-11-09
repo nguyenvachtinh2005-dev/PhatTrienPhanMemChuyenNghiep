@@ -1,0 +1,150 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffb6c1; /* Thay trực tiếp mã màu vào đây */
+  font-family: Arial, sans-serif;
+}
+
+.header, .footer {
+  background-color: #89cff0;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  color: #000;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+.footer {
+  justify-content: center;
+}
+
+.nav-links a {
+  margin-left: 20px;
+  text-decoration: none;
+  color: #000;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.login-card {
+  background: #ffffff;
+  border: 1px solid #666;
+  width: 420px;
+  padding: 40px 30px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.title {
+  color: #2e75b6;
+  font-size: 28px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 20px;
+
+  input {
+    width: 100%;
+    padding: 12px 40px 12px 15px;
+    border: 1px solid #aaa;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+
+    &::placeholder {
+      color: #b5a4a4;
+    }
+  }
+
+  .icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+  }
+}
+
+.forgot-password-container {
+  text-align: left;
+  margin-bottom: 25px;
+
+  .btn-forgot {
+    background-color: #4472c4;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+}
+
+.btn-submit {
+  width: 100%;
+  background-color: #2e75b6;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-bottom: 25px;
+
+  &:hover {
+    background-color: #20558a;
+  }
+}
+
+.btn-submit:disabled {
+  background-color: #93b5c6;
+  cursor: not-allowed;
+}
+
+.register-redirect {
+  font-size: 14px;
+  color: #000;
+
+  a {
+    color: #0000ff;
+    font-weight: bold;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.error-banner {
+  color: #d9534f;
+  font-size: 14px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.error-text {
+  color: #d9534f;
+  font-size: 12px;
+  text-align: left;
+  margin-top: -12px;
+  margin-bottom: 15px;
+  padding-left: 2px;
+}

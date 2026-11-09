@@ -1,0 +1,73 @@
+<div class="page-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">Hệ thống healthbooking</div>
+    <nav class="nav-links">
+      <a href="#">Trang Chủ</a>
+      <a href="#">Liên Hệ</a>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="login-card">
+      <h2 class="title">Đăng Nhập</h2>
+      
+      <!-- Thông báo lỗi từ API (nếu có) -->
+      <div *ngIf="errorMessage" class="error-banner">
+        {{ errorMessage }}
+      </div>
+      
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- Email hoặc sđt -->
+        <div class="input-group">
+          <input 
+            type="text" 
+            formControlName="emailOrPhone" 
+            placeholder="Email hoặc sđt ...." 
+          />
+          <span class="icon">👤</span>
+        </div>
+        <!-- Lỗi validate trường email/sđt -->
+        <div *ngIf="submitted && f['emailOrPhone'].errors" class="error-text">
+          <small *ngIf="f['emailOrPhone'].errors['required']">Vui lòng không để trống trường này.</small>
+        </div>
+
+        <!-- Mật khẩu -->
+        <div class="input-group">
+          <input 
+            type="password" 
+            formControlName="password" 
+            placeholder="Mật khẩu ..." 
+          />
+          <span class="icon">🔒</span>
+        </div>
+        <!-- Lỗi validate trường password -->
+        <div *ngIf="submitted && f['password'].errors" class="error-text">
+          <small *ngIf="f['password'].errors['required']">Vui lòng không để trống mật khẩu.</small>
+        </div>
+
+        <!-- Quên mật khẩu -->
+        <div class="forgot-password-container">
+          <button type="button" class="btn-forgot">Quên mật khẩu 💬</button>
+        </div>
+
+        <!-- Nút Đăng nhập (Tự động đổi trạng thái khi isLoading = true) -->
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          <span *ngIf="isLoading">Đang xử lý...</span>
+          <span *ngIf="!isLoading">Đăng nhập</span>
+        </button>
+      </form>
+
+      <!-- Đăng ký -->
+      <div class="register-redirect">
+        Chưa có tài khoản ? <a href="#">Đăng Ký</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    Hệ thống healthbooking
+  </footer>
+</div>
