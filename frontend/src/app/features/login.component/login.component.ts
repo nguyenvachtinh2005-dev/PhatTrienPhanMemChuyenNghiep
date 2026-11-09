@@ -16,6 +16,9 @@ export class LoginComponent {
   submitted = false;
   errorMessage = '';
   isLoading = false;
+  
+  // Biến quản lý trạng thái ẩn/hiện mật khẩu
+  hidePassword = true;
 
   constructor(
     private fb: FormBuilder,
@@ -24,11 +27,16 @@ export class LoginComponent {
   ) {
     this.loginForm = this.fb.group({
       emailOrPhone: ['', [Validators.required]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required, Validators.minLength(6)]]
     });
   }
 
   get f() { return this.loginForm.controls; }
+
+  // Hàm chuyển đổi trạng thái ẩn/hiện mật khẩu khi bấm vào icon con mắt
+  togglePasswordVisibility() {
+    this.hidePassword = !this.hidePassword;
+  }
 
   onSubmit() {
     this.submitted = true;
@@ -39,28 +47,31 @@ export class LoginComponent {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Lấy thông tin từ form (tương ứng với LoginRequest)
-    const credentials = this.loginForm.value;
+    const inputVal = this.loginForm.value.emailOrPhone.trim();
+    const password = this.loginForm.value.password;
 
-    // 🎯 ĐẶT ĐOẠN CODE XỬ LÝ API VÀ ĐIỀU HƯỚNG VÀO ĐÂY:
-    this.authService.login(credentials).subscribe({
+    const loginPayload = { 
+      email: inputVal, 
+      password 
+    };
+
+    this.authService.login(loginPayload).subscribe({
       next: (response) => {
         this.isLoading = false;
         
-        // TypeScript hiểu rõ response có những gì nhờ Model
-        const accountName = response.name || credentials.emailOrPhone;
-        const userRole = response.role; // Gợi ý chuẩn xác 'admin' | 'doctor' | 'user'
+        const token = response.data.token;
+        const user = response.data.user;
 
-        console.log(`Đăng nhập thành công với quyền: ${userRole}`);
+        localStorage.setItem('accessToken', token);
 
-        // Điều hướng sang trang chào mừng kèm theo tên tài khoản
+        console.log(`Đăng nhập thành công với quyền: ${user.role}, Tên: ${user.full_name}`);
+
         this.router.navigate(['/welcome'], { 
-          queryParams: { username: accountName } 
+          queryParams: { username: user.full_name } 
         });
       },
       error: (err) => {
         this.isLoading = false;
-        // Lấy thông báo lỗi từ backend trả về hoặc gán thông báo mặc định
         this.errorMessage = err.error?.message || 'Đăng nhập thất bại!';
         console.error('Lỗi đăng nhập:', err);
       }

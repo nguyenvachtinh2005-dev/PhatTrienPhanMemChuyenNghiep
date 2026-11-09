@@ -1,12 +1,21 @@
 export interface LoginRequest {
-  emailOrPhone: string;
+  email: string;
   password: string;
+}
+
+export interface UserInfo {
+  id: number;
+  full_name: string;
+  email: string;
+  phone?: string;
+  role: 'ADMIN' | 'DOCTOR' | 'PATIENT';
 }
 
 export interface LoginResponse {
   success: boolean;
   message: string;
-  token: string;
-  role: 'admin' | 'doctor' | 'user';
-  name?: string; // Tên hiển thị của người dùng (nếu backend trả về)
+  data: {
+    token: string;
+    user: UserInfo;
+  };
 }

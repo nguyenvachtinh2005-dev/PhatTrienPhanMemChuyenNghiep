@@ -5,5 +5,5 @@ import { WelcomeComponent } from './features/welcome.component/welcome.component
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'welcome', component: WelcomeComponent } // Thêm route này
+  { path: 'welcome', component: WelcomeComponent }
 ];

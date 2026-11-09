@@ -148,3 +148,39 @@
   margin-bottom: 15px;
   padding-left: 2px;
 }
+
+.input-group.password-group {
+  position: relative;
+}
+
+.input-group.password-group input {
+  padding-right: 75px; /* Chừa khoảng trống cho cả 2 icon bên phải */
+}
+
+/* Định vị icon ổ khóa ở góc phải */
+.password-group .lock-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none; /* Giúp click xuyên qua icon ổ khóa */
+}
+
+/* Định vị icon con mắt nằm cạnh icon ổ khóa */
+.password-group .toggle-eye {
+  position: absolute;
+  right: 42px; /* Đặt lùi sang trái so với ổ khóa */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.password-group .toggle-eye:hover {
+  color: #2e75b6; /* Đổi màu xanh nhẹ khi di chuột vào icon mắt */
+}
