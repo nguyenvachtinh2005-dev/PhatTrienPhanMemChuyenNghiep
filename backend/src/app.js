@@ -1,21 +1,26 @@
-const express = require("express");
-const cors = require("cors");
+const express = require('express');
+const cors = require('cors');
+
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
-// Cấu hình CORS cho Frontend
+// Middleware
 app.use(cors({
-    origin: "http://localhost:5500"
+    origin: 'http://localhost:4200'
 }));
 
-// Cho phép Backend nhận dữ liệu JSON
 app.use(express.json());
 
-// API kiểm tra hoạt động
-app.get("/", (req, res) => {
-    res.json({
-        message: "HealBooking API is running!"
+// API kiểm tra Backend
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: 'HealBooking Backend đang hoạt động!'
     });
 });
+
+// API xác thực
+app.use('/api/auth', authRoutes);
 
 module.exports = app;
