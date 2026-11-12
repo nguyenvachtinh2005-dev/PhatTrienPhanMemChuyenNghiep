@@ -1,0 +1,279 @@
+
+<div class="register-page">
+  <div class="register-container">
+
+    <!-- TIÊU ĐỀ -->
+    <div class="register-header">
+      <div class="register-logo">HealBooking</div>
+
+      <h2>
+        {{
+          role === 'PATIENT'
+            ? 'Đăng ký bệnh nhân'
+            : role === 'DOCTOR'
+              ? 'Đăng ký bác sĩ'
+              : 'Đăng ký tài khoản'
+        }}
+      </h2>
+
+      <p *ngIf="role === null">
+        Vui lòng chọn loại tài khoản bạn muốn đăng ký
+      </p>
+
+      <p *ngIf="role === 'PATIENT'">
+        Tạo tài khoản để đặt lịch khám bệnh trực tuyến
+      </p>
+
+      <p *ngIf="role === 'DOCTOR'">
+        Tạo tài khoản bác sĩ trên hệ thống HealBooking
+      </p>
+    </div>
+
+    <!-- THÔNG BÁO -->
+    <div class="success-message" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
+
+    <div class="server-error" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- 1. CHỌN LOẠI TÀI KHOẢN -->
+    <div class="role-options" *ngIf="role === null">
+
+      <a class="role-card" routerLink="/register/doctor">
+        <div class="role-icon">🩺</div>
+        <h3>Bác sĩ</h3>
+        <p>Đăng ký tài khoản dành cho bác sĩ</p>
+      </a>
+
+      <a class="role-card" routerLink="/register/patient">
+        <div class="role-icon">👤</div>
+        <h3>Bệnh nhân</h3>
+        <p>Đăng ký tài khoản để đặt lịch khám</p>
+      </a>
+
+    </div>
+
+    <!-- 2. FORM ĐĂNG KÝ -->
+    <form
+      *ngIf="role !== null"
+      [formGroup]="registerForm"
+      (ngSubmit)="onSubmit()"
+      class="register-form"
+    >
+
+      <!-- THÔNG TIN CHUNG -->
+      <div class="form-group">
+        <label>Họ và tên *</label>
+
+        <input
+          type="text"
+          formControlName="full_name"
+          placeholder="Nhập họ và tên"
+        />
+
+        <small class="error-message"
+          *ngIf="registerForm.get('full_name')?.touched && registerForm.get('full_name')?.invalid">
+          Vui lòng nhập họ tên (ít nhất 2 ký tự).
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Email *</label>
+
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="example@gmail.com"
+        />
+
+        <small class="error-message"
+          *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+          Vui lòng nhập email hợp lệ.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Số điện thoại *</label>
+
+        <input
+          type="tel"
+          formControlName="phone"
+          placeholder="Nhập số điện thoại"
+        />
+
+        <small class="error-message"
+          *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid">
+          Số điện thoại phải có 10 hoặc 11 chữ số.
+        </small>
+      </div>
+
+      <!-- THÔNG TIN BỆNH NHÂN -->
+      <ng-container *ngIf="role === 'PATIENT'">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ngày sinh</label>
+
+            <input
+              type="date"
+              formControlName="date_of_birth"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Giới tính</label>
+
+            <select formControlName="gender">
+              <option value="">Chọn giới tính</option>
+              <option value="MALE">Nam</option>
+              <option value="FEMALE">Nữ</option>
+              <option value="OTHER">Khác</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Địa chỉ</label>
+
+          <textarea
+            formControlName="address"
+            placeholder="Nhập địa chỉ của bạn"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Tiền sử bệnh</label>
+
+          <textarea
+            formControlName="medical_history"
+            placeholder="Nhập tiền sử bệnh (nếu có)"
+          ></textarea>
+        </div>
+
+      </ng-container>
+
+      <!-- THÔNG TIN BÁC SĨ -->
+      <ng-container *ngIf="role === 'DOCTOR'">
+
+        <div class="form-group">
+          <label>Chuyên khoa *</label>
+
+          <select formControlName="specialty_id">
+            <option value="">Chọn chuyên khoa</option>
+
+            <option
+              *ngFor="let specialty of specialties"
+              [value]="specialty.id"
+            >
+              {{ specialty.name }}
+            </option>
+          </select>
+
+          <small class="error-message"
+            *ngIf="registerForm.get('specialty_id')?.touched && !registerForm.get('specialty_id')?.value">
+            Vui lòng chọn chuyên khoa.
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Bằng cấp *</label>
+
+          <input
+            type="text"
+            formControlName="degree"
+            placeholder="Ví dụ: Bác sĩ chuyên khoa I"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Số năm kinh nghiệm *</label>
+
+          <input
+            type="number"
+            min="0"
+            formControlName="experience_years"
+            placeholder="Nhập số năm kinh nghiệm"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Số giấy phép hành nghề *</label>
+
+          <input
+            type="text"
+            formControlName="license_number"
+            placeholder="Nhập số giấy phép hành nghề"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Địa chỉ nơi làm việc *</label>
+
+          <textarea
+            formControlName="work_address"
+            placeholder="Nhập địa chỉ phòng khám hoặc bệnh viện"
+          ></textarea>
+        </div>
+
+      </ng-container>
+
+      <!-- MẬT KHẨU -->
+      <div class="form-group">
+        <label>Mật khẩu *</label>
+
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Nhập mật khẩu (ít nhất 8 ký tự)"
+        />
+
+        <small class="error-message"
+          *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+          Mật khẩu phải có ít nhất 8 ký tự.
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Xác nhận mật khẩu *</label>
+
+        <input
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="Nhập lại mật khẩu"
+        />
+
+        <small class="error-message"
+          *ngIf="registerForm.get('confirmPassword')?.touched && isPasswordMismatch()">
+          Mật khẩu xác nhận không khớp.
+        </small>
+      </div>
+
+      <!-- NÚT ĐĂNG KÝ -->
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="loading"
+      >
+        {{ loading ? 'Đang đăng ký...' : 'Đăng ký tài khoản' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn-back"
+        routerLink="/register"
+      >
+        Quay lại chọn loại tài khoản
+      </button>
+
+    </form>
+
+    <!-- QUAY VỀ ĐĂNG NHẬP -->
+    <div class="login-link">
+      Đã có tài khoản?
+      <a routerLink="/login">Đăng nhập ngay</a>
+    </div>
+
+  </div>
+</div>

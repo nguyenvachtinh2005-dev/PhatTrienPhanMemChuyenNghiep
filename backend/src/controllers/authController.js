@@ -1,8 +1,8 @@
 const authService = require('../services/authService');
 
-// ===============================
+// =====================================
 // API ĐĂNG KÝ
-// ===============================
+// =====================================
 const register = async (req, res) => {
     try {
         const {
@@ -13,7 +13,14 @@ const register = async (req, res) => {
         } = req.body;
 
         // Kiểm tra dữ liệu bắt buộc
-        if (!full_name || !email || !password) {
+        if (
+            typeof full_name !== 'string' ||
+            typeof email !== 'string' ||
+            typeof password !== 'string' ||
+            !full_name.trim() ||
+            !email.trim() ||
+            !password
+        ) {
             return res.status(400).json({
                 success: false,
                 message: 'Vui lòng nhập họ tên, email và mật khẩu'
@@ -47,7 +54,15 @@ const register = async (req, res) => {
         }
 
         // Kiểm tra số điện thoại nếu có nhập
-        if (phone && !/^[0-9+()\-\s]{9,15}$/.test(phone.trim())) {
+        if (
+            phone !== undefined &&
+            phone !== null &&
+            phone !== '' &&
+            (
+                typeof phone !== 'string' ||
+                !/^[0-9+()\-\s]{9,15}$/.test(phone.trim())
+            )
+        ) {
             return res.status(400).json({
                 success: false,
                 message: 'Số điện thoại không hợp lệ'
@@ -70,6 +85,14 @@ const register = async (req, res) => {
     } catch (error) {
         console.error('Register error:', error.message);
 
+        // Xử lý trường hợp trùng email hoặc số điện thoại
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(409).json({
+                success: false,
+                message: 'Email hoặc số điện thoại đã được sử dụng'
+            });
+        }
+
         return res.status(error.statusCode || 500).json({
             success: false,
             message: error.statusCode
@@ -80,14 +103,19 @@ const register = async (req, res) => {
 };
 
 
-// ===============================
+// =====================================
 // API ĐĂNG NHẬP
-// ===============================
+// =====================================
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        if (!email || !password) {
+        if (
+            typeof email !== 'string' ||
+            typeof password !== 'string' ||
+            !email.trim() ||
+            !password
+        ) {
             return res.status(400).json({
                 success: false,
                 message: 'Vui lòng nhập email và mật khẩu'
@@ -113,6 +141,7 @@ const login = async (req, res) => {
         });
     }
 };
+
 
 module.exports = {
     register,

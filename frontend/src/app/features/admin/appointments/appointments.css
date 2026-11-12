@@ -1,0 +1,486 @@
+
+.appointment-page {
+  width: 100%;
+  padding: 22px 24px;
+  box-sizing: border-box;
+  color: #263238;
+  font-family: Arial, sans-serif;
+}
+
+/* TIÊU ĐỀ */
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.page-heading h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #263238;
+}
+
+.page-heading p {
+  margin: 0;
+  font-size: 12px;
+  color: #888;
+}
+
+.refresh-button {
+  padding: 9px 15px;
+  border: none;
+  border-radius: 5px;
+  background: #08b8c5;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.refresh-button:hover {
+  background: #0799a5;
+}
+
+/* THÔNG BÁO */
+.alert-message {
+  padding: 11px 14px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+.error-message {
+  color: #b42318;
+  background: #fff0ee;
+  border: 1px solid #ffd1cc;
+}
+
+.success-message {
+  color: #16834a;
+  background: #eaf8ef;
+  border: 1px solid #c8edd4;
+}
+
+/* TÌM KIẾM VÀ BỘ LỌC */
+.filter-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+
+.search-box input {
+  width: 100%;
+  height: 40px;
+  padding: 0 38px 0 13px;
+  box-sizing: border-box;
+  border: 1px solid #dce9eb;
+  border-radius: 5px;
+  outline: none;
+  background: #e7f8fa;
+  font-size: 12px;
+}
+
+.search-box input:focus {
+  border-color: #08b8c5;
+}
+
+.search-icon {
+  position: absolute;
+  right: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #087f8c;
+  font-size: 21px;
+}
+
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-controls select,
+.filter-controls input {
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid #dce9eb;
+  border-radius: 5px;
+  outline: none;
+  background: #e7f8fa;
+  color: #333;
+  font-size: 12px;
+}
+
+.filter-controls select {
+  min-width: 145px;
+}
+
+.date-filter {
+  width: 135px;
+}
+
+.reset-button {
+  height: 40px;
+  padding: 0 13px;
+  border: 1px solid #08b8c5;
+  border-radius: 5px;
+  background: white;
+  color: #087f8c;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.reset-button:hover {
+  background: #e7f8fa;
+}
+
+/* BẢNG DỮ LIỆU */
+.table-section {
+  width: 100%;
+  background: white;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e3e7e9;
+  border-radius: 5px;
+}
+
+.appointment-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: center;
+}
+
+.appointment-table thead {
+  background: #f1f5f6;
+}
+
+.appointment-table th {
+  padding: 13px 9px;
+  color: #263238;
+  font-weight: 700;
+  white-space: nowrap;
+  border-bottom: 1px solid #e3e7e9;
+}
+
+.appointment-table td {
+  padding: 12px 9px;
+  border-bottom: 1px solid #edf0f1;
+  color: #424b50;
+  white-space: nowrap;
+}
+
+.appointment-table tbody tr:hover {
+  background: #f8fcfc;
+}
+
+.appointment-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.id-cell {
+  font-weight: 700;
+  color: #087f8c !important;
+}
+
+.empty-message {
+  height: 100px;
+  color: #888 !important;
+  text-align: center;
+}
+
+/* TRẠNG THÁI */
+.status-badge {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #fff5d9;
+  color: #a87500;
+}
+
+.status-confirmed {
+  background: #e3f1ff;
+  color: #1769aa;
+}
+
+.status-completed {
+  background: #e5f7eb;
+  color: #16834a;
+}
+
+.status-cancelled {
+  background: #ffe8e8;
+  color: #d03434;
+}
+
+.status-rejected {
+  background: #f1e8ff;
+  color: #7844ad;
+}
+
+/* NÚT XEM CHI TIẾT */
+.detail-button {
+  padding: 6px 13px;
+  border: none;
+  border-radius: 4px;
+  background: #08b8c5;
+  color: white;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.detail-button:hover {
+  background: #0799a5;
+}
+
+/* PHÂN TRANG */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  margin-top: 20px;
+}
+
+.page-button {
+  min-width: 29px;
+  height: 29px;
+  padding: 0 7px;
+  border: 1px solid #e2e8ea;
+  border-radius: 4px;
+  background: white;
+  color: #555;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.page-button:hover:not(:disabled) {
+  border-color: #08b8c5;
+  color: #087f8c;
+}
+
+.page-button.active {
+  background: #087fdd;
+  border-color: #087fdd;
+  color: white;
+}
+
+.page-button:disabled,
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.table-summary {
+  margin-top: 12px;
+  text-align: right;
+  color: #888;
+  font-size: 11px;
+}
+
+/* MODAL CHI TIẾT */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: white;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid #edf0f1;
+}
+
+.modal-header h3 {
+  margin: 0 0 5px;
+  font-size: 17px;
+  color: #087f8c;
+}
+
+.modal-header p {
+  margin: 0;
+  color: #888;
+  font-size: 12px;
+}
+
+.close-icon {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #777;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 20px 22px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f2f3;
+  font-size: 13px;
+}
+
+.detail-row span {
+  color: #777;
+}
+
+.detail-row strong {
+  max-width: 65%;
+  text-align: right;
+  font-weight: 600;
+  color: #333;
+}
+
+.reason-row {
+  align-items: flex-start;
+}
+
+/* CẬP NHẬT TRẠNG THÁI */
+.status-edit {
+  margin-top: 20px;
+}
+
+.status-edit label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-edit select {
+  width: 100%;
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid #dce4e6;
+  border-radius: 5px;
+  outline: none;
+  font-size: 13px;
+}
+
+.status-edit select:focus {
+  border-color: #08b8c5;
+}
+
+/* NÚT MODAL */
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 15px 22px;
+  border-top: 1px solid #edf0f1;
+}
+
+.modal-footer button {
+  min-width: 125px;
+  height: 39px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.close-button {
+  background: #edf1f2;
+  color: #555;
+}
+
+.close-button:hover {
+  background: #dfe6e8;
+}
+
+.save-button {
+  background: #087fdd;
+  color: white;
+}
+
+.save-button:hover {
+  background: #066bbd;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .filter-section {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filter-controls {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .appointment-page {
+    padding: 15px 10px;
+  }
+
+  .page-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .filter-controls > * {
+    flex: 1;
+    min-width: 100px;
+  }
+
+  .detail-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .detail-row strong {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer button {
+    width: 100%;
+  }
+}

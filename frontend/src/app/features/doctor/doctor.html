@@ -1,0 +1,43 @@
+
+<div class="dashboard-page">
+
+  <header class="dashboard-header">
+    <div class="brand">
+      <span class="brand-icon">✚</span>
+      <span>HealBooking BÁC SĨ</span>
+    </div>
+
+    <div class="header-user">
+      <span>{{ user?.full_name }}</span>
+      <button class="logout-button" (click)="logout()">
+        Đăng xuất
+      </button>
+    </div>
+  </header>
+
+  <main class="dashboard-content">
+
+    <section class="welcome">
+      <h1>Xin chào, Bác sĩ {{ user?.full_name }}!</h1>
+      <p>Chúc bạn có một ngày làm việc hiệu quả cùng HealBooking.</p>
+    </section>
+
+    <section class="dashboard-section">
+      <h2>Chức năng dành cho bác sĩ</h2>
+
+      <div class="function-grid">
+        <div class="function-card" *ngFor="let item of functions">
+          <div class="function-icon">{{ item.icon }}</div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="dashboard-footer">
+    © 2026 HealBooking - Hệ thống đặt lịch khám bệnh trực tuyến
+  </footer>
+
+</div>

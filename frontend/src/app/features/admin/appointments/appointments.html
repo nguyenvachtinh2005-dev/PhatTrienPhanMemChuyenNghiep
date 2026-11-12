@@ -1,0 +1,384 @@
+
+<div class="appointment-page">
+
+  <!-- TIÊU ĐỀ -->
+  <div class="page-heading">
+    <div>
+      <h2>Quản lý lịch khám</h2>
+      <p>Quản lý và theo dõi các lịch khám trong hệ thống</p>
+    </div>
+
+    <button
+      class="refresh-button"
+      type="button"
+      (click)="loadAppointments()"
+      [disabled]="isLoading">
+      ↻ Làm mới
+    </button>
+  </div>
+
+  <!-- THÔNG BÁO LỖI -->
+  @if (errorMessage && !showDetailModal) {
+    <div class="alert-message error-message">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <!-- THANH TÌM KIẾM VÀ LỌC -->
+  <div class="filter-section">
+
+    <div class="search-box">
+      <input
+        type="text"
+        [ngModel]="searchText"
+        (ngModelChange)="onSearchChange($event)"
+        placeholder="Tìm kiếm lịch khám...">
+
+      <span class="search-icon">⌕</span>
+    </div>
+
+    <div class="filter-controls">
+
+      <select
+        [ngModel]="selectedStatus"
+        (change)="onStatusChange($event)">
+
+        <option value="">Tất cả trạng thái</option>
+
+        @for (item of statusOptions; track item.value) {
+          <option [value]="item.value">
+            {{ item.label }}
+          </option>
+        }
+
+      </select>
+
+      <input
+        type="date"
+        class="date-filter"
+        [ngModel]="selectedDate"
+        (change)="onDateChange($event)">
+
+      <button
+        class="reset-button"
+        type="button"
+        (click)="resetFilters()">
+        Xóa lọc
+      </button>
+
+    </div>
+  </div>
+
+  <!-- BẢNG LỊCH KHÁM -->
+  <div class="table-section">
+
+    <div class="table-wrapper">
+
+      <table class="appointment-table">
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Bệnh nhân</th>
+            <th>Bác sĩ</th>
+            <th>Ngày khám</th>
+            <th>Giờ khám</th>
+            <th>Trạng thái</th>
+            <th>Chi tiết</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @if (isLoading) {
+
+            <tr>
+              <td colspan="7" class="empty-message">
+                Đang tải danh sách lịch khám...
+              </td>
+            </tr>
+
+          } @else if (appointments.length === 0) {
+
+            <tr>
+              <td colspan="7" class="empty-message">
+                Không tìm thấy lịch khám phù hợp.
+              </td>
+            </tr>
+
+          } @else {
+
+            @for (appointment of appointments; track appointment.id) {
+
+              <tr>
+
+                <td class="id-cell">
+                  {{ appointment.id }}
+                </td>
+
+                <td>
+                  {{ appointment.patient_name }}
+                </td>
+
+                <td>
+                  {{ appointment.doctor_name }}
+                </td>
+
+                <td>
+                  {{ appointment.appointment_date | date:'dd/MM/yyyy' }}
+                </td>
+
+                <td>
+                  {{ appointment.slot_start_time | date:'HH:mm' }}
+                  -
+                  {{ appointment.slot_end_time | date:'HH:mm' }}
+                </td>
+
+                <td>
+                  <span
+                    class="status-badge"
+                    [ngClass]="'status-' + appointment.status.toLowerCase()">
+                    {{ getStatusLabel(appointment.status) }}
+                  </span>
+                </td>
+
+                <td>
+                  <button
+                    class="detail-button"
+                    type="button"
+                    (click)="openDetail(appointment)">
+                    Xem
+                  </button>
+                </td>
+
+              </tr>
+
+            }
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- PHÂN TRANG -->
+    @if (!isLoading && totalPages > 0) {
+
+      <div class="pagination">
+
+        <button
+          type="button"
+          class="page-button"
+          (click)="goToPage(currentPage - 1)"
+          [disabled]="currentPage === 1">
+          ‹
+        </button>
+
+        @for (page of pageNumbers; track page) {
+
+          <button
+            type="button"
+            class="page-button"
+            [class.active]="currentPage === page"
+            (click)="goToPage(page)">
+            {{ page }}
+          </button>
+
+        }
+
+        <button
+          type="button"
+          class="page-button"
+          (click)="goToPage(currentPage + 1)"
+          [disabled]="currentPage === totalPages">
+          ›
+        </button>
+
+      </div>
+
+    }
+
+    <!-- TỔNG SỐ LỊCH KHÁM -->
+    <div class="table-summary">
+      Tổng số: {{ totalAppointments }} lịch khám
+    </div>
+
+  </div>
+
+  <!-- MODAL CHI TIẾT LỊCH KHÁM -->
+  @if (showDetailModal && selectedAppointment) {
+
+    <div
+      class="modal-overlay"
+      (click)="closeDetail()">
+
+      <div
+        class="modal-content"
+        (click)="$event.stopPropagation()">
+
+        <!-- TIÊU ĐỀ MODAL -->
+        <div class="modal-header">
+
+          <div>
+            <h3>Chi tiết lịch khám</h3>
+            <p>Mã lịch khám: {{ selectedAppointment.id }}</p>
+          </div>
+
+          <button
+            type="button"
+            class="close-icon"
+            (click)="closeDetail()">
+            ×
+          </button>
+
+        </div>
+
+        <!-- NỘI DUNG CHI TIẾT -->
+        <div class="modal-body">
+
+          <div class="detail-row">
+            <span>Bệnh nhân</span>
+            <strong>
+              {{ selectedAppointment.patient_name }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Email bệnh nhân</span>
+            <strong>
+              {{ selectedAppointment.patient_email || 'Chưa cung cấp' }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Số điện thoại</span>
+            <strong>
+              {{ selectedAppointment.patient_phone || 'Chưa cung cấp' }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Bác sĩ</span>
+            <strong>
+              {{ selectedAppointment.doctor_name }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Chuyên môn</span>
+            <strong>
+              {{ selectedAppointment.doctor_degree || 'Chưa cập nhật' }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Ngày khám</span>
+            <strong>
+              {{ selectedAppointment.appointment_date | date:'dd/MM/yyyy' }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Giờ khám</span>
+            <strong>
+              {{ selectedAppointment.slot_start_time | date:'HH:mm' }}
+              -
+              {{ selectedAppointment.slot_end_time | date:'HH:mm' }}
+            </strong>
+          </div>
+
+          <div class="detail-row reason-row">
+            <span>Lý do khám</span>
+            <strong>
+              {{ selectedAppointment.reason || 'Chưa cung cấp' }}
+            </strong>
+          </div>
+
+          <div class="detail-row">
+            <span>Ngày tạo lịch</span>
+            <strong>
+              {{ selectedAppointment.created_at | date:'dd/MM/yyyy HH:mm' }}
+            </strong>
+          </div>
+
+          <!-- TRẠNG THÁI LỊCH KHÁM -->
+          <div class="status-edit">
+
+            <label for="appointmentStatus">
+              Trạng thái lịch khám
+            </label>
+
+            <select
+              id="appointmentStatus"
+              [(ngModel)]="selectedAppointment.status"
+              [disabled]="isCompleted(selectedAppointment) || isUpdating">
+
+              @for (item of statusOptions; track item.value) {
+                <option [value]="item.value">
+                  {{ item.label }}
+                </option>
+              }
+
+            </select>
+
+          </div>
+
+          <!-- THÔNG BÁO LỊCH ĐÃ HOÀN THÀNH -->
+          @if (isCompleted(selectedAppointment)) {
+            <div class="alert-message success-message">
+              Lịch khám đã hoàn thành. Không thể thay đổi trạng thái.
+            </div>
+          }
+
+          @if (errorMessage) {
+            <div class="alert-message error-message">
+              {{ errorMessage }}
+            </div>
+          }
+
+          @if (successMessage) {
+            <div class="alert-message success-message">
+              {{ successMessage }}
+            </div>
+          }
+
+        </div>
+
+        <!-- NÚT CHỨC NĂNG -->
+        <div class="modal-footer">
+
+          <button
+            type="button"
+            class="close-button"
+            (click)="closeDetail()"
+            [disabled]="isUpdating">
+            Đóng
+          </button>
+
+          <button
+            type="button"
+            class="save-button"
+            (click)="updateStatus()"
+            [disabled]="isUpdating || isCompleted(selectedAppointment)">
+
+            @if (isCompleted(selectedAppointment)) {
+              Đã hoàn thành
+            } @else if (isUpdating) {
+              Đang cập nhật...
+            } @else {
+              Cập nhật trạng thái
+            }
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  }
+
+</div>

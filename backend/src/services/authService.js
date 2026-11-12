@@ -2,18 +2,45 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// ===============================
-// ĐĂNG KÝ TÀI KHOẢN
-// ===============================
-const register = async (userData) => {
-    const { full_name, email, phone, password } = userData;
+// =====================================
+// TẠO JWT TOKEN
+// =====================================
+const generateToken = (user) => {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('Chưa cấu hình JWT_SECRET trong file .env');
+    }
 
+    return jwt.sign(
+        {
+            id: user.id,
+            role: user.role
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: process.env.JWT_EXPIRES_IN || '1d'
+        }
+    );
+};
+
+
+// =====================================
+// ĐĂNG KÝ BỆNH NHÂN
+// =====================================
+const register = async (userData) => {
+    const {
+        full_name,
+        email,
+        phone,
+        password
+    } = userData;
+
+    const normalizedName = full_name.trim();
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPhone = phone ? phone.trim() : null;
 
     // Kiểm tra email đã tồn tại
     const [existingEmail] = await db.query(
-        'SELECT id FROM users WHERE email = ?',
+        'SELECT id FROM users WHERE email = ? LIMIT 1',
         [normalizedEmail]
     );
 
@@ -26,7 +53,7 @@ const register = async (userData) => {
     // Kiểm tra số điện thoại đã tồn tại
     if (normalizedPhone) {
         const [existingPhone] = await db.query(
-            'SELECT id FROM users WHERE phone = ?',
+            'SELECT id FROM users WHERE phone = ? LIMIT 1',
             [normalizedPhone]
         );
 
@@ -40,13 +67,20 @@ const register = async (userData) => {
     // Mã hóa mật khẩu
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Lưu tài khoản với vai trò PATIENT
+    // Tạo tài khoản bệnh nhân
     const [result] = await db.query(
         `INSERT INTO users
-        (full_name, email, phone, password, role)
-        VALUES (?, ?, ?, ?, 'PATIENT')`,
+        (
+            full_name,
+            email,
+            phone,
+            password,
+            role,
+            account_status
+        )
+        VALUES (?, ?, ?, ?, 'PATIENT', 'ACTIVE')`,
         [
-            full_name.trim(),
+            normalizedName,
             normalizedEmail,
             normalizedPhone,
             hashedPassword
@@ -55,30 +89,38 @@ const register = async (userData) => {
 
     return {
         id: result.insertId,
-        full_name: full_name.trim(),
+        full_name: normalizedName,
         email: normalizedEmail,
         phone: normalizedPhone,
-        role: 'PATIENT'
+        role: 'PATIENT',
+        account_status: 'ACTIVE'
     };
 };
 
 
-// ===============================
+// =====================================
 // ĐĂNG NHẬP
-// ===============================
+// =====================================
 const login = async (email, password) => {
     const normalizedEmail = email.trim().toLowerCase();
 
-    // Tìm tài khoản
+    // Tìm tài khoản trong MySQL
     const [users] = await db.query(
-        `SELECT id, full_name, email, phone,
-                password, role, account_status
-         FROM users
-         WHERE email = ?
-         LIMIT 1`,
+        `SELECT
+            id,
+            full_name,
+            email,
+            phone,
+            password,
+            role,
+            account_status
+        FROM users
+        WHERE email = ?
+        LIMIT 1`,
         [normalizedEmail]
     );
 
+    // Không tìm thấy tài khoản
     if (users.length === 0) {
         const error = new Error('Email hoặc mật khẩu không chính xác');
         error.statusCode = 401;
@@ -86,13 +128,6 @@ const login = async (email, password) => {
     }
 
     const user = users[0];
-
-    // Kiểm tra trạng thái tài khoản
-    if (user.account_status !== 'ACTIVE') {
-        const error = new Error('Tài khoản hiện không hoạt động');
-        error.statusCode = 403;
-        throw error;
-    }
 
     // Kiểm tra mật khẩu
     const isMatch = await bcrypt.compare(
@@ -106,24 +141,26 @@ const login = async (email, password) => {
         throw error;
     }
 
-    // Kiểm tra JWT_SECRET
-    if (!process.env.JWT_SECRET) {
-        throw new Error('Chưa cấu hình JWT_SECRET');
+    // Kiểm tra trạng thái tài khoản
+    if (user.account_status !== 'ACTIVE') {
+        const error = new Error('Tài khoản hiện không hoạt động hoặc đã bị khóa');
+        error.statusCode = 403;
+        throw error;
     }
 
-    // Tạo JWT Token
-    const token = jwt.sign(
-        {
-            id: user.id,
-            role: user.role
-        },
-        process.env.JWT_SECRET,
-        {
-            expiresIn: process.env.JWT_EXPIRES_IN || '1d'
-        }
-    );
+    // Kiểm tra role hợp lệ
+    const validRoles = ['PATIENT', 'DOCTOR', 'ADMIN'];
 
-    // Trả thông tin người dùng
+    if (!validRoles.includes(user.role)) {
+        const error = new Error('Vai trò tài khoản không hợp lệ');
+        error.statusCode = 403;
+        throw error;
+    }
+
+    // Tạo JWT
+    const token = generateToken(user);
+
+    // Không trả mật khẩu về Frontend
     return {
         token,
         user: {
@@ -136,6 +173,10 @@ const login = async (email, password) => {
     };
 };
 
+
+// =====================================
+// EXPORT
+// =====================================
 module.exports = {
     register,
     login
