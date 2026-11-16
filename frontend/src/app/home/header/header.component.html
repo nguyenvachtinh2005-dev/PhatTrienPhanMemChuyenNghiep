@@ -1,0 +1,24 @@
+<header class="header">
+  <div class="header-container">
+
+    <!-- Góc trái: Logo -->
+    <a routerLink="/" class="logo">
+      <span class="logo-icon">✚</span>
+      <span>Hệ thống HealBooking</span>
+    </a>
+
+    <!-- Chính giữa: Menu -->
+    <nav class="nav-menu">
+      <a routerLink="/" class="nav-link">Trang chủ</a>
+      <a href="#contact" class="nav-link">Liên hệ</a>
+    </nav>
+
+    <!-- Góc phải: Đăng xuất -->
+    <div class="header-actions">
+      <button class="btn-logout" (click)="logout()">
+        Đăng xuất
+      </button>
+    </div>
+
+  </div>
+</header>

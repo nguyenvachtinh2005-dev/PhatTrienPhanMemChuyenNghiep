@@ -1,56 +1,75 @@
-<div class="page-container">
-  <!-- Header -->
-  <header class="header">
-    <div class="logo">Hệ thống healthbooking</div>
-    <nav class="nav-links">
-      <a href="#">Trang Chủ</a>
-      <a href="#">Liên Hệ</a>
-    </nav>
-  </header>
+<div class="login-page">
+  <div class="login-container">
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <div class="login-card">
-      <h2 class="title">Đăng Nhập</h2>
-      
-      <!-- Thông báo lỗi từ API (nếu có) -->
-      <div *ngIf="errorMessage" class="error-banner">
-        {{ errorMessage }}
+    <div class="login-header">
+      <div class="login-logo">
+        HealBooking
       </div>
-      
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-        <!-- Email hoặc sđt -->
-        <div class="input-group">
-          <input 
-            type="text" 
-            formControlName="emailOrPhone" 
-            placeholder="Email hoặc sđt ...." 
-          />
-          <span class="icon">👤</span>
-        </div>
-        <div *ngIf="submitted && f['emailOrPhone'].errors" class="error-text">
-          <small *ngIf="f['emailOrPhone'].errors['required']">Vui lòng không để trống trường này.</small>
-        </div>
+      <h2>Đăng Nhập</h2>
+      <p>Vui lòng đăng nhập để tiếp tục sử dụng hệ thống</p>
+    </div>
 
-        <!-- Mật khẩu -->
-        <div class="input-group password-group">
-          <input 
-            [type]="hidePassword ? 'password' : 'text'" 
-            formControlName="password" 
-            placeholder="Mật khẩu ..." 
+    <!-- Thông báo từ Server -->
+    <div class="success-message" *ngIf="successMessage">
+      {{ successMessage }}
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <!-- Form đăng nhập đồng bộ với loginForm trong .ts -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+      <!-- Trường Email -->
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="Nhập địa chỉ email"
+        />
+
+        <small
+          class="field-error"
+          *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('required')"
+        >
+          Vui lòng nhập email.
+        </small>
+
+        <small
+          class="field-error"
+          *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.hasError('email')"
+        >
+          Email không đúng định dạng.
+        </small>
+      </div>
+
+      <!-- Trường Mật khẩu kèm nút ẩn/hiện -->
+      <div class="form-group">
+        <label for="password">Mật khẩu</label>
+        
+        <div class="password-wrapper">
+          <input
+            id="password"
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="Nhập mật khẩu"
           />
-          <!-- Icon ổ khóa -->
-          <span class="icon lock-icon">🔒</span>
-          
-          <!-- Icon con mắt dạng Vector SVG chuẩn UI/UX -->
-          <span class="toggle-eye" (click)="togglePasswordVisibility()" title="Ẩn/Hiện mật khẩu">
-            <!-- 1. Mắt mở (Hiển thị khi password đang hiện) -->
+
+          <span 
+            class="toggle-eye" 
+            (click)="togglePasswordVisibility()" 
+            [title]="hidePassword ? 'Hiện mật khẩu' : 'Ẩn mật khẩu'"
+          >
+            <!-- Mắt mở (khi mật khẩu đang hiển thị) -->
             <svg *ngIf="!hidePassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
               <circle cx="12" cy="12" r="3"></circle>
             </svg>
 
-            <!-- 2. Mắt có đường chéo cắt ngang (Hiển thị khi password đang bị ẩn/che) -->
+            <!-- Mắt gạch chéo (khi mật khẩu đang bị ẩn) -->
             <svg *ngIf="hidePassword" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
               <line x1="1" y1="1" x2="23" y2="23"></line>
@@ -58,27 +77,24 @@
           </span>
         </div>
 
-        <!-- Quên mật khẩu -->
-        <div class="forgot-password-container">
-          <button type="button" class="btn-forgot">Quên mật khẩu 💬</button>
-        </div>
-
-        <!-- Nút Đăng nhập -->
-        <button type="submit" class="btn-submit" [disabled]="isLoading">
-          <span *ngIf="isLoading">Đang xử lý...</span>
-          <span *ngIf="!isLoading">Đăng nhập</span>
-        </button>
-      </form>
-
-      <!-- Đăng ký -->
-      <div class="register-redirect">
-        Chưa có tài khoản ? <a href="#">Đăng Ký</a>
+        <small
+          class="field-error"
+          *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.hasError('required')"
+        >
+          Vui lòng nhập mật khẩu.
+        </small>
       </div>
-    </div>
-  </main>
 
-  <!-- Footer -->
-  <footer class="footer">
-    Hệ thống healthbooking
-  </footer>
+      <button type="submit" [disabled]="isLoading">
+        {{ isLoading ? 'Đang đăng nhập...' : 'Đăng nhập' }}
+      </button>
+
+    </form>
+
+    <div class="register-link">
+      Chưa có tài khoản?
+      <a routerLink="/register">Đăng ký tài khoản</a>
+    </div>
+
+  </div>
 </div>

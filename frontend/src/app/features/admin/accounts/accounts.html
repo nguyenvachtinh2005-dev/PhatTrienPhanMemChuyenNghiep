@@ -1,0 +1,303 @@
+
+<div class="account-page">
+
+  <!-- MAIN -->
+  <main class="account-main">
+
+    <!-- PAGE TITLE -->
+    <div class="page-heading">
+      <div>
+
+        <h1>Quản lý tài khoản</h1>
+
+        <p>
+          Theo dõi và quản lý tài khoản bệnh nhân, bác sĩ và quản trị viên.
+        </p>
+
+      </div>
+
+      <button
+        class="refresh-btn"
+        (click)="loadAccounts()"
+        [disabled]="isLoading">
+        ↻ Làm mới
+      </button>
+    </div>
+
+    <!-- THÔNG BÁO -->
+    <div class="alert success-alert" *ngIf="successMessage">
+      ✓ {{ successMessage }}
+    </div>
+
+    <div class="alert error-alert" *ngIf="errorMessage">
+      ⚠ {{ errorMessage }}
+    </div>
+
+    <!-- FILTER -->
+    <section class="filter-section">
+
+      <div class="filter-heading">
+        <h2>Danh sách tài khoản</h2>
+      </div>
+
+      <div class="filter-controls">
+
+        <div class="search-box">
+          <span>⌕</span>
+
+          <input
+            type="text"
+            placeholder="Tìm theo tên, email, số điện thoại hoặc mã tài khoản..."
+            [(ngModel)]="searchText"
+            (ngModelChange)="applyFilters()">
+        </div>
+
+        <select
+          [(ngModel)]="selectedRole"
+          (ngModelChange)="applyFilters()">
+
+          <option value="">Tất cả vai trò</option>
+          <option value="PATIENT">Bệnh nhân</option>
+          <option value="DOCTOR">Bác sĩ</option>
+          <option value="ADMIN">Quản trị viên</option>
+
+        </select>
+
+        <select
+          [(ngModel)]="selectedStatus"
+          (ngModelChange)="applyFilters()">
+
+          <option value="">Tất cả trạng thái</option>
+          <option value="ACTIVE">Đang hoạt động</option>
+          <option value="INACTIVE">Ngừng hoạt động</option>
+          <option value="LOCKED">Đã khóa</option>
+
+        </select>
+
+        <button class="reset-btn" (click)="resetFilters()">
+          Xóa bộ lọc
+        </button>
+
+      </div>
+
+    </section>
+
+    <!-- ACCOUNT TABLE -->
+    <section class="table-section">
+
+      <div class="table-responsive">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Mã tài khoản</th>
+              <th>Họ và tên</th>
+              <th>Email</th>
+              <th>Số điện thoại</th>
+              <th>Vai trò</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <!-- LOADING -->
+            <tr *ngIf="isLoading">
+              <td colspan="7" class="empty-cell">
+                <span class="loading-spinner"></span>
+                Đang tải danh sách tài khoản...
+              </td>
+            </tr>
+
+            <!-- EMPTY -->
+            <tr *ngIf="!isLoading && filteredAccounts.length === 0">
+              <td colspan="7" class="empty-cell">
+                <div class="empty-icon">👥</div>
+                <strong>Không tìm thấy tài khoản</strong>
+                <p>
+                  Hiện chưa có dữ liệu phù hợp với điều kiện tìm kiếm.
+                </p>
+              </td>
+            </tr>
+
+            <!-- ACCOUNT DATA -->
+            <tr *ngFor="let account of paginatedAccounts">
+
+              <td>{{ account.id }}</td>
+
+              <td class="account-name">
+                {{ account.full_name }}
+              </td>
+
+              <td>{{ account.email }}</td>
+
+              <td>{{ account.phone || 'Chưa cập nhật' }}</td>
+
+              <td>
+                <span
+                  class="role-badge"
+                  [ngClass]="'role-' + account.role.toLowerCase()">
+                  {{ getRoleLabel(account.role) }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="status-badge"
+                  [ngClass]="{
+                    'status-active': account.account_status === 'ACTIVE',
+                    'status-locked': account.account_status === 'LOCKED',
+                    'status-inactive': account.account_status === 'INACTIVE'
+                  }">
+                  {{ getStatusLabel(account.account_status) }}
+                </span>
+              </td>
+
+              <td>
+                <div class="action-buttons">
+
+                  <button
+                    class="detail-btn"
+                    (click)="viewAccount(account)">
+                    Chi tiết
+                  </button>
+
+                  <button
+                    *ngIf="account.account_status === 'ACTIVE'"
+                    class="lock-btn"
+                    (click)="changeAccountStatus(account)"
+                    [disabled]="isUpdating || account.role === 'ADMIN'">
+                    Khóa
+                  </button>
+
+                  <button
+                    *ngIf="account.account_status === 'LOCKED'"
+                    class="unlock-btn"
+                    (click)="changeAccountStatus(account)"
+                    [disabled]="isUpdating">
+                    Mở khóa
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <!-- PHÂN TRANG -->
+      <div
+        class="pagination"
+        *ngIf="!isLoading && filteredAccounts.length > 0">
+
+        <div class="pagination-controls">
+
+          <button
+            type="button"
+            class="pagination-btn"
+            (click)="previousPage()"
+            [disabled]="currentPage === 1">
+            Trang trước
+          </button>
+
+          <span class="page-number">
+            Trang {{ currentPage }} / {{ totalPages }}
+          </span>
+
+          <button
+            type="button"
+            class="pagination-btn"
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages">
+            Trang sau
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ACCOUNT DETAIL MODAL -->
+  <div
+    class="modal-overlay"
+    *ngIf="selectedAccount"
+    (click)="closeDetails()">
+
+    <div
+      class="modal-content"
+      (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <h2>Thông tin tài khoản</h2>
+
+        <button class="close-btn" (click)="closeDetails()">
+          ×
+        </button>
+      </div>
+
+      <div class="detail-content">
+
+        <div class="detail-item">
+          <label>Mã tài khoản</label>
+          <p>{{ selectedAccount.id }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Họ và tên</label>
+          <p>{{ selectedAccount.full_name }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Email</label>
+          <p>{{ selectedAccount.email }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Số điện thoại</label>
+          <p>{{ selectedAccount.phone || 'Chưa cập nhật' }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Vai trò</label>
+          <p>{{ getRoleLabel(selectedAccount.role) }}</p>
+        </div>
+
+        <div class="detail-item">
+          <label>Trạng thái</label>
+          <p>{{ getStatusLabel(selectedAccount.account_status) }}</p>
+        </div>
+
+        <div class="detail-item" *ngIf="selectedAccount.created_at">
+          <label>Ngày tạo tài khoản</label>
+          <p>{{ selectedAccount.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button
+        type="button"
+        class="btn-delete"
+        *ngIf="selectedAccount && selectedAccount.role !== 'ADMIN'"
+        [disabled]="isUpdating"
+        (click)="deleteAccount(selectedAccount)">
+        {{ isUpdating ? 'Đang xử lý...' : 'Xóa tài khoản' }}
+      </button>
+        <button class="close-modal-btn" (click)="closeDetails()">
+          Đóng
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
