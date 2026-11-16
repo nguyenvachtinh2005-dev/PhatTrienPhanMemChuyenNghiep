@@ -57,7 +57,7 @@ export class LoginComponent {
   }
 
   // Xử lý đăng nhập
-  onSubmit() {
+  onSubmit(): void {
     // Kiểm tra dữ liệu nhập
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();

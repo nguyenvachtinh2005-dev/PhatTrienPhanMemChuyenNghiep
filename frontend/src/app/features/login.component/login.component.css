@@ -219,7 +219,7 @@ form button:disabled {
 }
 
 .password-wrapper input {
-  padding-right: 45px; /* Chừa khoảng trống bên phải để chữ không đè lên icon mắt */
+  padding-right: 45px;
 }
 
 .toggle-eye {
@@ -235,11 +235,10 @@ form button:disabled {
 }
 
 .toggle-eye:hover {
-  color: #0d9488; /* Đồng bộ màu xanh ngọc chủ đạo của HealBooking */
+  color: #0d9488;
 }
 
 @media (max-width: 480px) {
-  /* Các style responsive hiện tại của bạn */
   .login-page {
     padding: 18px 12px;
   }
@@ -256,7 +255,6 @@ form button:disabled {
     font-size: 22px;
   }
 
-  /* (Tùy chọn) Tinh chỉnh icon mắt nhỏ lại chút trên mobile nếu cần */
   .toggle-eye svg {
     width: 18px;
     height: 18px;
