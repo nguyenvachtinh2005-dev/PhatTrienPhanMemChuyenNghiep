@@ -1,4 +1,3 @@
-
 <div class="appointment-page">
 
   <!-- TIÊU ĐỀ -->
@@ -313,9 +312,17 @@
             <select
               id="appointmentStatus"
               [(ngModel)]="selectedAppointment.status"
-              [disabled]="isCompleted(selectedAppointment) || isUpdating">
+              [disabled]="isStatusLocked(selectedAppointment) || isUpdating">
 
-              @for (item of statusOptions; track item.value) {
+              <!-- Trạng thái hiện tại -->
+              <option
+                [value]="originalAppointmentStatus"
+                disabled>
+                {{ getStatusLabel(originalAppointmentStatus || '') }}
+              </option>
+
+              <!-- Các trạng thái được phép chuyển -->
+              @for (item of getAllowedStatusOptions(); track item.value) {
                 <option [value]="item.value">
                   {{ item.label }}
                 </option>
@@ -325,10 +332,12 @@
 
           </div>
 
-          <!-- THÔNG BÁO LỊCH ĐÃ HOÀN THÀNH -->
-          @if (isCompleted(selectedAppointment)) {
+          <!-- THÔNG BÁO TRẠNG THÁI ĐÃ KHÓA -->
+          @if (isStatusLocked(selectedAppointment)) {
             <div class="alert-message success-message">
-              Lịch khám đã hoàn thành. Không thể thay đổi trạng thái.
+              Lịch khám đã
+              {{ getStatusLabel(originalAppointmentStatus || '').toLowerCase() }}.
+              Không thể thay đổi trạng thái.
             </div>
           }
 
@@ -361,10 +370,10 @@
             type="button"
             class="save-button"
             (click)="updateStatus()"
-            [disabled]="isUpdating || isCompleted(selectedAppointment)">
+            [disabled]="!canUpdateStatus()">
 
-            @if (isCompleted(selectedAppointment)) {
-              Đã hoàn thành
+            @if (isStatusLocked(selectedAppointment)) {
+              Không thể chỉnh sửa
             } @else if (isUpdating) {
               Đang cập nhật...
             } @else {

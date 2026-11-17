@@ -135,7 +135,6 @@ const changeAppointmentStatus = async (req, res) => {
 
         const doctorAllowedStatuses = [
             'CONFIRMED',
-            'REJECTED',
             'COMPLETED'
         ];
 

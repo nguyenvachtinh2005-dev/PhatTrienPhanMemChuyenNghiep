@@ -1,4 +1,3 @@
-
 import {
   Component,
   OnInit,
@@ -98,6 +97,9 @@ export class Appointments implements OnInit, OnDestroy {
 
   selectedAppointment: Appointment | null = null;
 
+  // Lưu trạng thái ban đầu lấy từ database
+  originalAppointmentStatus: Appointment['status'] | null = null;
+
   searchText = '';
   selectedStatus = '';
   selectedDate = '';
@@ -131,26 +133,17 @@ export class Appointments implements OnInit, OnDestroy {
 
   // Khởi tạo component và chọn API theo vai trò
   ngOnInit(): void {
-
     const user = this.authService.getUser();
 
     this.userRole = user?.role || null;
 
     if (this.userRole === 'ADMIN') {
-
-      this.apiUrl =
-        `${this.API_BASE_URL}/admin/appointments`;
-
+      this.apiUrl = `${this.API_BASE_URL}/admin/appointments`;
     } else if (this.userRole === 'DOCTOR') {
-
-      this.apiUrl =
-        `${this.API_BASE_URL}/doctor/appointments`;
-
+      this.apiUrl = `${this.API_BASE_URL}/doctor/appointments`;
     } else {
-
       this.errorMessage =
         'Bạn không có quyền thực hiện chức năng này';
-
       return;
     }
 
@@ -207,7 +200,6 @@ export class Appointments implements OnInit, OnDestroy {
 
   // Lấy danh sách lịch khám
   loadAppointments(): void {
-
     if (!this.apiUrl) {
       this.errorMessage =
         'Không xác định được API lịch khám theo vai trò tài khoản.';
@@ -232,9 +224,7 @@ export class Appointments implements OnInit, OnDestroy {
     ).subscribe({
 
       next: (response) => {
-
         if (response.success) {
-
           this.appointments = response.data || [];
 
           this.totalAppointments =
@@ -244,7 +234,6 @@ export class Appointments implements OnInit, OnDestroy {
             response.pagination?.totalPages || 0;
 
         } else {
-
           this.appointments = [];
           this.totalAppointments = 0;
           this.totalPages = 0;
@@ -256,18 +245,11 @@ export class Appointments implements OnInit, OnDestroy {
 
         this.isLoading = false;
 
-        console.log(
-          `[Appointments] Vai trò: ${this.userRole}`
-        );
-
-        console.log(
-          `[Appointments] API: ${this.apiUrl}`
-        );
-
+        console.log(`[Appointments] Vai trò: ${this.userRole}`);
+        console.log(`[Appointments] API: ${this.apiUrl}`);
         console.log(
           `[Appointments] Thời gian tải: ${Date.now() - startTime}ms`
         );
-
         console.log(
           '[Appointments] Số lịch khám:',
           this.appointments.length
@@ -277,11 +259,7 @@ export class Appointments implements OnInit, OnDestroy {
       },
 
       error: (error) => {
-
-        console.error(
-          'Lỗi lấy danh sách lịch khám:',
-          error
-        );
+        console.error('Lỗi lấy danh sách lịch khám:', error);
 
         this.appointments = [];
         this.totalAppointments = 0;
@@ -332,7 +310,6 @@ export class Appointments implements OnInit, OnDestroy {
 
   // Chuyển trang
   goToPage(page: number): void {
-
     if (
       page < 1 ||
       page > this.totalPages ||
@@ -362,18 +339,62 @@ export class Appointments implements OnInit, OnDestroy {
     return pages;
   }
 
-  // Kiểm tra lịch khám đã hoàn thành chưa
-  isCompleted(appointment: Appointment | null): boolean {
-    return appointment?.status === 'COMPLETED';
+  // Kiểm tra trạng thái ban đầu có bị khóa không
+  isStatusLocked(appointment: Appointment | null): boolean {
+    if (!appointment || !this.originalAppointmentStatus) {
+      return false;
+    }
+
+    return (
+      this.originalAppointmentStatus === 'COMPLETED' ||
+      this.originalAppointmentStatus === 'CANCELLED' ||
+      this.originalAppointmentStatus === 'REJECTED'
+    );
+  }
+
+  // Lấy các trạng thái được phép chuyển đổi
+  getAllowedStatusOptions() {
+    switch (this.originalAppointmentStatus) {
+      case 'PENDING':
+        return this.statusOptions.filter(item =>
+          ['CONFIRMED', 'CANCELLED'].includes(item.value)
+        );
+
+      case 'CONFIRMED':
+        return this.statusOptions.filter(item =>
+          item.value === 'COMPLETED'
+        );
+
+      default:
+        return [];
+    }
+  }
+
+  // Kiểm tra có được phép cập nhật trạng thái không
+  canUpdateStatus(): boolean {
+    if (
+      !this.selectedAppointment ||
+      !this.originalAppointmentStatus ||
+      this.isUpdating ||
+      this.isStatusLocked(this.selectedAppointment)
+    ) {
+      return false;
+    }
+
+    return this.getAllowedStatusOptions().some(
+      item =>
+        item.value === this.selectedAppointment?.status &&
+        item.value !== this.originalAppointmentStatus
+    );
   }
 
   // Xem chi tiết lịch khám
   openDetail(appointment: Appointment): void {
-
     this.errorMessage = '';
     this.successMessage = '';
 
     this.selectedAppointment = { ...appointment };
+    this.originalAppointmentStatus = appointment.status;
     this.showDetailModal = true;
 
     this.cdr.detectChanges();
@@ -388,24 +409,20 @@ export class Appointments implements OnInit, OnDestroy {
     ).subscribe({
 
       next: (response) => {
-
         if (
           response.success &&
           response.data &&
           this.selectedAppointment?.id === appointment.id
         ) {
           this.selectedAppointment = response.data;
+          this.originalAppointmentStatus = response.data.status;
         }
 
         this.cdr.detectChanges();
       },
 
       error: (error) => {
-
-        console.error(
-          'Lỗi lấy chi tiết lịch khám:',
-          error
-        );
+        console.error('Lỗi lấy chi tiết lịch khám:', error);
 
         this.errorMessage =
           error.error?.message ||
@@ -418,7 +435,6 @@ export class Appointments implements OnInit, OnDestroy {
 
   // Tải lại chi tiết sau khi cập nhật
   private reloadAppointmentDetail(id: number): void {
-
     this.detailSubscription?.unsubscribe();
 
     this.detailSubscription = this.http.get<ApiResponse<Appointment>>(
@@ -429,25 +445,20 @@ export class Appointments implements OnInit, OnDestroy {
     ).subscribe({
 
       next: (response) => {
-
         if (
           response.success &&
           response.data &&
           this.selectedAppointment?.id === id
         ) {
           this.selectedAppointment = response.data;
+          this.originalAppointmentStatus = response.data.status;
         }
 
         this.cdr.detectChanges();
       },
 
       error: (error) => {
-
-        console.error(
-          'Lỗi tải lại chi tiết lịch khám:',
-          error
-        );
-
+        console.error('Lỗi tải lại chi tiết lịch khám:', error);
         this.cdr.detectChanges();
       }
     });
@@ -455,7 +466,6 @@ export class Appointments implements OnInit, OnDestroy {
 
   // Đóng cửa sổ chi tiết
   closeDetail(): void {
-
     if (this.isUpdating) {
       return;
     }
@@ -464,6 +474,7 @@ export class Appointments implements OnInit, OnDestroy {
 
     this.showDetailModal = false;
     this.selectedAppointment = null;
+    this.originalAppointmentStatus = null;
 
     this.errorMessage = '';
     this.successMessage = '';
@@ -473,19 +484,12 @@ export class Appointments implements OnInit, OnDestroy {
 
   // Cập nhật trạng thái lịch khám
   updateStatus(): void {
-
-    if (
-      !this.selectedAppointment ||
-      this.isUpdating
-    ) {
+    if (!this.selectedAppointment || this.isUpdating) {
       return;
     }
 
-    if (this.isCompleted(this.selectedAppointment)) {
-
-      this.errorMessage =
-        'Lịch khám đã hoàn thành, không thể thay đổi trạng thái!';
-
+    if (!this.canUpdateStatus()) {
+      this.errorMessage = 'Không thể chuyển sang trạng thái này.';
       this.cdr.detectChanges();
       return;
     }
@@ -508,42 +512,43 @@ export class Appointments implements OnInit, OnDestroy {
     ).subscribe({
 
       next: (response) => {
-
         if (response.success) {
+          this.originalAppointmentStatus = newStatus;
 
           this.successMessage =
             response.message ||
             'Cập nhật trạng thái thành công!';
 
           this.loadAppointments();
-
           this.reloadAppointmentDetail(appointmentId);
 
         } else {
-
           this.errorMessage =
             response.message ||
             'Không thể cập nhật trạng thái.';
         }
 
         this.isUpdating = false;
-
         this.cdr.detectChanges();
       },
 
       error: (error) => {
-
-        console.error(
-          'Lỗi cập nhật trạng thái:',
-          error
-        );
+        console.error('Lỗi cập nhật trạng thái:', error);
 
         this.errorMessage =
           error.error?.message ||
           'Không thể cập nhật trạng thái lịch khám.';
 
-        this.isUpdating = false;
+        // Khôi phục trạng thái ban đầu nếu cập nhật thất bại
+        if (
+          this.selectedAppointment &&
+          this.originalAppointmentStatus
+        ) {
+          this.selectedAppointment.status =
+            this.originalAppointmentStatus;
+        }
 
+        this.isUpdating = false;
         this.cdr.detectChanges();
       }
     });
@@ -551,7 +556,6 @@ export class Appointments implements OnInit, OnDestroy {
 
   // Tên trạng thái tiếng Việt
   getStatusLabel(status: string): string {
-
     const item = this.statusOptions.find(
       option => option.value === status
     );
@@ -561,7 +565,6 @@ export class Appointments implements OnInit, OnDestroy {
 
   // Xóa bộ lọc
   resetFilters(): void {
-
     this.searchText = '';
     this.selectedStatus = '';
     this.selectedDate = '';
@@ -569,7 +572,6 @@ export class Appointments implements OnInit, OnDestroy {
     this.currentPage = 1;
 
     this.searchSubject.next('');
-
     this.loadAppointments();
   }
 }

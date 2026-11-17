@@ -1,4 +1,3 @@
-
 const appointmentService = require('../services/appointmentService');
 
 // GET /api/admin/appointments

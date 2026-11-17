@@ -1,43 +1,519 @@
 
-<div class="dashboard-page">
+<div class="patient-layout">
 
-  <header class="dashboard-header">
-    <div class="brand">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <div class="sidebar-brand">
       <span class="brand-icon">✚</span>
-      <span>HealBooking</span>
+      <span>HealthBooking</span>
     </div>
 
-    <div class="header-user">
-      <span>{{ user?.full_name }}</span>
-      <button class="logout-button" (click)="logout()">
+    <nav class="sidebar-menu">
+
+      <button
+        type="button"
+        class="menu-item"
+        [class.active]="currentPage === 'home'"
+        (click)="openHome()"
+      >
+        <span>⌂</span>
+        <span>Trang chủ</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item"
+        [class.active]="currentPage === 'appointments'"
+        (click)="openBooking()"
+      >
+        <span>▣</span>
+        <span>Đặt lịch khám</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item"
+        (click)="openHome()"
+      >
+        <span>↶</span>
+        <span>Hủy lịch khám</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item"
+        (click)="openHome()"
+      >
+        <span>◷</span>
+        <span>Theo dõi trạng thái khám</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item"
+        (click)="openHome()"
+      >
+        <span>♧</span>
+        <span>Nhận thông báo nhắc lịch</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item"
+        (click)="openHome()"
+      >
+        <span>♙</span>
+        <span>Xem thông tin bác sĩ</span>
+      </button>
+
+      <button
+        type="button"
+        class="menu-item disabled"
+        disabled
+        title="Chức năng đang phát triển"
+      >
+        <span>⚙</span>
+        <span>Thông tin tài khoản</span>
+      </button>
+
+    </nav>
+
+    <!-- SIDEBAR BOTTOM -->
+    <div class="sidebar-bottom">
+
+      <div class="sidebar-support">
+        <p>Tổng đài hỗ trợ</p>
+        <strong>19001000</strong>
+      </div>
+
+      <button
+        type="button"
+        class="sidebar-logout"
+        (click)="logout()"
+      >
+        <span>⇥</span>
         Đăng xuất
       </button>
+
     </div>
-  </header>
 
-  <main class="dashboard-content">
+  </aside>
 
-    <section class="welcome">
-      <h1>Xin chào, {{ user?.full_name }}!</h1>
-      <p>Chào mừng bạn đến với hệ thống đặt lịch khám bệnh HealBooking.</p>
-    </section>
+  <!-- MAIN -->
+  <main class="main-area">
 
-    <section class="dashboard-section">
-      <h2>Các chức năng dành cho bệnh nhân</h2>
+    <!-- HEADER -->
+    <header class="top-header">
 
-      <div class="function-grid">
-        <div class="function-card" *ngFor="let item of functions">
-          <div class="function-icon">{{ item.icon }}</div>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.description }}</p>
-        </div>
+      <div class="header-user">
+
+        <button
+          type="button"
+          class="notification-button"
+          title="Thông báo"
+        >
+          ♧
+        </button>
+
+        <span class="user-avatar">
+          {{ (user?.full_name || 'B').charAt(0).toUpperCase() }}
+        </span>
+
+        <span class="user-name">
+          {{ user?.full_name || 'Bệnh nhân' }}
+        </span>
+
       </div>
-    </section>
+
+    </header>
+
+    <!-- PAGE BODY -->
+    <div class="page-content">
+
+      <!-- TRANG CHỦ -->
+      <ng-container *ngIf="currentPage === 'home'">
+
+        <!-- TÌM KIẾM -->
+        <div class="content-card search-card">
+
+          <h3>Tìm kiếm và đặt lịch khám</h3>
+
+          <div class="search-form autocomplete-wrapper">
+
+            <input
+              type="text"
+              placeholder="⌕ Tìm bác sĩ..."
+              [(ngModel)]="searchText"
+              (ngModelChange)="onSearchInput()"
+              (keyup.enter)="searchDoctors()"
+              (focus)="showSuggestions = searchText.trim().length > 0"
+            />
+
+            <select
+              [(ngModel)]="selectedSpecialtyFilter"
+              (change)="searchDoctors()"
+            >
+              <option value="">Chọn chuyên khoa</option>
+
+              <option
+                *ngFor="let specialty of specialties"
+                [value]="specialty.id"
+              >
+                {{ specialty.name }}
+              </option>
+            </select>
+
+            <button
+              type="button"
+              class="date-filter"
+              (click)="openBooking()"
+            >
+              Đặt ngày khám
+            </button>
+
+            <button
+              type="button"
+              class="primary-button"
+              (click)="searchDoctors()"
+            >
+              Tìm kiếm
+            </button>
+
+            <!-- GỢI Ý -->
+            <div
+              class="suggestion-box main-suggestion"
+              *ngIf="showSuggestions"
+            >
+
+              <div *ngIf="suggestedDoctors.length > 0">
+
+                <div class="suggestion-heading">
+                  BÁC SĨ
+                </div>
+
+                <button
+                  type="button"
+                  class="suggestion-item"
+                  *ngFor="let doctor of suggestedDoctors"
+                  (click)="selectSuggestedDoctor(doctor)"
+                >
+                  <span class="suggestion-icon">♙</span>
+
+                  <span class="suggestion-information">
+                    <strong>{{ doctor.full_name }}</strong>
+                    <small>
+                      {{ doctor.specialty_name || 'Bác sĩ' }}
+                    </small>
+                  </span>
+                </button>
+
+              </div>
+
+              <div *ngIf="suggestedSpecialties.length > 0">
+
+                <div class="suggestion-heading">
+                  CHUYÊN KHOA
+                </div>
+
+                <button
+                  type="button"
+                  class="suggestion-item"
+                  *ngFor="let specialty of suggestedSpecialties"
+                  (click)="selectSuggestedSpecialty(specialty)"
+                >
+                  <span class="suggestion-icon">♡</span>
+
+                  <span class="suggestion-information">
+                    <strong>{{ specialty.name }}</strong>
+                    <small>Chuyên khoa</small>
+                  </span>
+                </button>
+
+              </div>
+
+              <div
+                class="suggestion-empty"
+                *ngIf="suggestedDoctors.length === 0 && suggestedSpecialties.length === 0"
+              >
+                Không tìm thấy kết quả phù hợp.
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="specialty-title">
+            Chuyên khoa phổ biến
+          </div>
+
+          <div class="specialty-list">
+
+            <button
+              type="button"
+              class="specialty-item"
+              *ngFor="let specialty of specialties.slice(0, 4)"
+              (click)="filterBySpecialty(specialty.id)"
+            >
+              <span class="specialty-icon">♡</span>
+              <span>{{ specialty.name }}</span>
+            </button>
+
+            <div
+              class="empty-specialty"
+              *ngIf="specialties.length === 0"
+            >
+              Chưa có dữ liệu chuyên khoa.
+            </div>
+
+          </div>
+
+          <button
+            type="button"
+            class="clear-search-button"
+            *ngIf="searchText || selectedSpecialtyFilter"
+            (click)="clearSearch()"
+          >
+            Xóa bộ lọc
+          </button>
+
+        </div>
+
+        <!-- THÔNG BÁO -->
+        <div
+          class="success-toast"
+          *ngIf="successMessage"
+        >
+          {{ successMessage }}
+        </div>
+
+        <div
+          class="error-toast"
+          *ngIf="errorMessage"
+        >
+          {{ errorMessage }}
+        </div>
+
+        <!-- LỊCH KHÁM SẮP TỚI -->
+        <div class="content-card upcoming-card">
+
+          <div class="card-heading">
+
+            <h3>Lịch khám sắp tới</h3>
+
+            <button
+              type="button"
+              class="text-button"
+              (click)="openBooking()"
+            >
+              Đặt lịch mới
+            </button>
+
+          </div>
+
+          <div
+            class="appointment-item"
+            *ngFor="let appointment of appointments"
+          >
+
+            <div class="appointment-date">
+              <span>
+                {{ formatDate(appointment.appointment_date) }}
+              </span>
+
+              <strong>
+                {{ formatTime(appointment.appointment_date) }}
+              </strong>
+            </div>
+
+            <div class="appointment-information">
+
+              <strong>
+                {{ appointment.specialty_name || 'Khám bệnh' }}
+              </strong>
+
+              <span>
+                {{ getDoctorName(appointment) }}
+              </span>
+
+              <span>
+                {{ appointment.work_address || 'Chưa có thông tin cơ sở khám' }}
+              </span>
+
+              <div class="appointment-time">
+                {{ formatTime(appointment.start_time || appointment.appointment_date) }}
+                -
+                {{ formatTime(appointment.end_time) }}
+              </div>
+
+            </div>
+
+            <div class="appointment-actions">
+
+              <span
+                class="status-label"
+                [ngClass]="'status-' + appointment.status.toLowerCase()"
+              >
+                {{ getAppointmentStatus(appointment.status) }}
+              </span>
+
+              <button
+                *ngIf="appointment.status === 'PENDING'"
+                type="button"
+                class="cancel-button"
+                (click)="cancelAppointment(appointment)"
+              >
+                Hủy lịch
+              </button>
+
+            </div>
+
+          </div>
+
+          <div
+            class="empty-appointments"
+            *ngIf="appointments.length === 0"
+          >
+            Bạn chưa có lịch khám nào.
+
+            <button
+              type="button"
+              (click)="openBooking()"
+            >
+              Đặt lịch khám ngay
+            </button>
+          </div>
+
+        </div>
+
+        <!-- DANH SÁCH BÁC SĨ -->
+        <div class="content-card doctors-card">
+
+          <div class="card-heading">
+            <div>
+              <h3>Danh sách bác sĩ</h3>
+              <p>Tìm bác sĩ phù hợp với nhu cầu khám bệnh</p>
+            </div>
+          </div>
+
+          <div class="doctor-list" *ngIf="!searching">
+
+            <div
+              class="doctor-item"
+              *ngFor="let doctor of doctors"
+            >
+
+              <div class="doctor-avatar">♙</div>
+
+              <div class="doctor-information">
+
+                <strong>{{ doctor.full_name }}</strong>
+
+                <span>
+                  {{ doctor.degree || 'Bác sĩ' }}
+
+                  <ng-container *ngIf="doctor.specialty_name">
+                    · {{ doctor.specialty_name }}
+                  </ng-container>
+                </span>
+
+                <span>
+                  {{ doctor.work_address || 'Chưa cập nhật địa chỉ khám' }}
+                </span>
+
+              </div>
+
+              <button
+                type="button"
+                class="primary-button doctor-book-button"
+                (click)="openBooking(doctor)"
+              >
+                Đặt lịch
+              </button>
+
+            </div>
+
+            <div
+              class="empty-doctors"
+              *ngIf="doctors.length === 0"
+            >
+              Không tìm thấy bác sĩ phù hợp.
+            </div>
+
+          </div>
+
+          <div class="loading-text" *ngIf="searching">
+            Đang tìm kiếm bác sĩ...
+          </div>
+
+        </div>
+
+      </ng-container>
+
+      <!-- COMPONENT ĐẶT LỊCH KHÁM -->
+      <app-appointments
+        *ngIf="currentPage === 'appointments'"
+        [initialDoctor]="bookingDoctor"
+        (back)="openHome()"
+        (bookingCompleted)="onBookingCompleted()"
+      ></app-appointments>
+
+      <!-- PROFILE / THÔNG TIN TÀI KHOẢN -->
+      <div
+        class="content-card account-card"
+        *ngIf="currentPage === 'account'"
+      >
+
+        <div class="account-heading">
+
+          <div>
+            <h2>Thông tin tài khoản</h2>
+            <p>Hồ sơ cá nhân của bạn</p>
+          </div>
+
+          <span class="account-avatar">
+            ♙
+          </span>
+
+        </div>
+
+        <div class="account-information">
+
+          <div class="account-row">
+            <span>Họ và tên</span>
+            <strong>
+              {{ user?.full_name || 'Chưa cập nhật' }}
+            </strong>
+          </div>
+
+          <div class="account-row">
+            <span>Email</span>
+            <strong>
+              {{ user?.email || 'Chưa cập nhật' }}
+            </strong>
+          </div>
+
+          <div class="account-row">
+            <span>Số điện thoại</span>
+            <strong>Chưa cập nhật</strong>
+          </div>
+
+          <div class="account-row">
+            <span>Vai trò</span>
+            <strong>Bệnh nhân</strong>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="page-footer">
+      Dự án HealBooking - Đặt lịch khám trực tuyến
+    </footer>
 
   </main>
-
-  <footer class="dashboard-footer">
-    © 2026 HealBooking - Hệ thống đặt lịch khám bệnh trực tuyến
-  </footer>
 
 </div>

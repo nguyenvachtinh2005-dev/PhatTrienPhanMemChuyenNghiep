@@ -1,0 +1,435 @@
+:host {
+  display: block;
+  width: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #111;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.booking-container {
+  width: 100%;
+  max-width: 1000px;
+  min-height: 450px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  border-radius: 5px;
+  background: #fff;
+}
+
+/* TITLE */
+.booking-title h2 {
+  margin: 0;
+  color: #111;
+  font-size: 16px;
+}
+
+.booking-title p {
+  margin: 4px 0 12px;
+  color: #888;
+  font-size: 10px;
+}
+
+/* PROGRESS */
+.progress-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 14px auto 20px;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: #777;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.step-number {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #aaa;
+  border-radius: 50%;
+  background: #fff;
+  color: #333;
+  font-size: 11px;
+}
+
+.progress-step.completed {
+  color: #168f88;
+}
+
+.progress-step.completed .step-number {
+  border-color: #168f88;
+  background: #168f88;
+  color: #fff;
+}
+
+.progress-line {
+  width: 75px;
+  height: 1px;
+  margin-top: -15px;
+  background: #ccc;
+}
+
+.progress-line.completed-line {
+  background: #168f88;
+}
+
+/* FORM */
+.booking-form {
+  width: 100%;
+}
+
+.step-caption {
+  margin-bottom: 5px;
+  color: #168f88;
+  font-size: 10px;
+}
+
+.booking-form h3 {
+  margin: 0 0 13px;
+  font-size: 13px;
+}
+
+.form-row {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 17px;
+}
+
+.three-columns {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.date-row {
+  grid-template-columns: minmax(180px, 1fr);
+}
+
+.form-group {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.form-group label,
+.patient-choice > label {
+  color: #222;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.form-group select,
+.form-group input {
+  width: 100%;
+  height: 35px;
+  padding: 0 9px;
+  border: 1px solid #bcbcbc;
+  border-radius: 6px;
+  background: #fff;
+  color: #222;
+  font-size: 11px;
+  outline-color: #168fce;
+}
+
+.form-group input[readonly] {
+  background: #f7f7f7;
+}
+
+.form-group select:disabled,
+.form-group input:disabled {
+  background: #f1f1f1;
+  cursor: not-allowed;
+}
+
+.loading-hint {
+  color: #888;
+  font-size: 10px;
+}
+
+/* REASON */
+.reason-group {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.reason-group textarea {
+  width: 100%;
+  min-height: 76px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid #888;
+  border-radius: 6px;
+  outline-color: #168fce;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.character-count {
+  margin-top: -24px;
+  margin-right: 10px;
+  color: #888;
+  text-align: right;
+  font-size: 10px;
+  pointer-events: none;
+}
+
+/* SLOTS */
+.slot-group {
+  margin: 16px 0;
+}
+
+.slot-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.slot-item {
+  min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 9px 12px;
+  border: 1px solid #bcbcbc;
+  border-radius: 6px;
+  background: #fff;
+  color: #333;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.slot-item small {
+  color: #888;
+  font-size: 9px;
+}
+
+.slot-item:hover {
+  border-color: #168f88;
+}
+
+.slot-item.selected {
+  border-color: #168f88;
+  background: #e9f8f6;
+  color: #087d74;
+}
+
+.slot-item:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.empty-slots,
+.slot-hint {
+  margin: 0;
+  color: #888;
+  font-size: 10px;
+}
+
+/* PATIENT */
+.patient-choice {
+  margin-top: 18px;
+}
+
+.patient-choice-card {
+  width: fit-content;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 9px;
+  border: 1px solid #888;
+  border-radius: 6px;
+}
+
+.choice-dot {
+  width: 9px;
+  height: 9px;
+  min-width: 9px;
+  border-radius: 50%;
+  background: #48a89b;
+}
+
+.patient-choice-card strong,
+.patient-choice-card small {
+  display: block;
+  font-size: 10px;
+}
+
+.patient-choice-card small {
+  margin-top: 4px;
+  color: #777;
+}
+
+/* BUTTONS */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.primary-button {
+  min-height: 34px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 4px;
+  background: #079fe0;
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: #0789c4;
+}
+
+.primary-button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.secondary-button {
+  min-height: 34px;
+  padding: 0 15px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  background: #fff;
+  color: #444;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  background: #f5f5f5;
+}
+
+/* ERROR */
+.form-message {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+.error-message {
+  background: #fff0ee;
+  color: #c0392b;
+}
+
+/* CONFIRMATION */
+.confirmation-list {
+  border: 1px solid #eee;
+  border-radius: 6px;
+}
+
+.confirmation-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 11px;
+}
+
+.confirmation-row:last-child {
+  border-bottom: none;
+}
+
+.confirmation-row span {
+  color: #777;
+}
+
+.confirmation-row strong {
+  max-width: 65%;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+/* SUCCESS */
+.completed-form {
+  padding: 45px 10px;
+  text-align: center;
+}
+
+.success-icon {
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  background: #e0f7ec;
+  color: #15965e;
+  font-size: 30px;
+}
+
+.completed-form h2 {
+  margin: 0 0 10px;
+  color: #168f68;
+  font-size: 18px;
+}
+
+.completed-form p {
+  color: #777;
+  font-size: 11px;
+}
+
+.center-actions {
+  justify-content: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 850px) {
+  .three-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-container {
+    padding: 18px 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .booking-container {
+    padding: 15px 12px;
+  }
+
+  .progress-area {
+    gap: 5px;
+  }
+
+  .progress-line {
+    width: 25px;
+  }
+
+  .progress-step {
+    font-size: 8px;
+  }
+
+  .confirmation-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .confirmation-row strong {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .form-actions {
+    flex-wrap: wrap;
+  }
+}

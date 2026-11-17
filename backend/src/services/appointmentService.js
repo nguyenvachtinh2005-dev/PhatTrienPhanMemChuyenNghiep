@@ -1,4 +1,3 @@
-
 const db = require('../config/db');
 
 // Các trạng thái hợp lệ của lịch khám
@@ -9,6 +8,15 @@ const VALID_STATUSES = [
     'CANCELLED',
     'REJECTED'
 ];
+
+// Quy tắc chuyển trạng thái dùng chung cho Admin và Bác sĩ
+const ALLOWED_TRANSITIONS = {
+    PENDING: ['CONFIRMED', 'CANCELLED'],
+    CONFIRMED: ['COMPLETED'],
+    COMPLETED: [],
+    CANCELLED: [],
+    REJECTED: []
+};
 
 // Lấy danh sách lịch khám
 const getAppointments = async ({
@@ -147,7 +155,6 @@ const getAppointmentById = async (id) => {
 };
 
 // Cập nhật trạng thái lịch khám và ghi lịch sử
-
 const updateAppointmentStatus = async (
     id,
     newStatus,
@@ -158,6 +165,16 @@ const updateAppointmentStatus = async (
     try {
         await connection.beginTransaction();
 
+        // Kiểm tra trạng thái mới
+        if (!VALID_STATUSES.includes(newStatus)) {
+            await connection.rollback();
+
+            return {
+                invalidStatus: true
+            };
+        }
+
+        // Lấy lịch khám và khóa bản ghi khi cập nhật
         const [rows] = await connection.execute(
             `
             SELECT id, doctor_id, status
@@ -177,48 +194,17 @@ const updateAppointmentStatus = async (
         const oldStatus = appointment.status;
 
         // Bác sĩ chỉ được thao tác lịch khám của chính mình
-        if (isDoctor && Number(appointment.doctor_id) !== Number(doctorId)) {
+        if (
+            isDoctor &&
+            Number(appointment.doctor_id) !== Number(doctorId)
+        ) {
             await connection.rollback();
             return null;
         }
 
-        // Đã hoàn thành thì không được thay đổi nữa
-        if (oldStatus === 'COMPLETED') {
-            await connection.rollback();
-
-            return {
-                id,
-                oldStatus,
-                newStatus,
-                changed: false,
-                locked: true
-            };
-        }
-
-        // Kiểm tra quy tắc chuyển trạng thái của bác sĩ
-        if (isDoctor) {
-            const allowedTransitions = {
-                PENDING: ['CONFIRMED', 'REJECTED'],
-                CONFIRMED: ['COMPLETED']
-            };
-
-            const allowed = allowedTransitions[oldStatus] || [];
-
-            if (!allowed.includes(newStatus)) {
-                await connection.rollback();
-
-                return {
-                    id,
-                    oldStatus,
-                    newStatus,
-                    changed: false,
-                    invalidTransition: true
-                };
-            }
-        }
-
+        // Không cập nhật nếu trạng thái không thay đổi
         if (oldStatus === newStatus) {
-            await connection.commit();
+            await connection.rollback();
 
             return {
                 id,
@@ -228,6 +214,22 @@ const updateAppointmentStatus = async (
             };
         }
 
+        // Kiểm tra quy tắc chuyển trạng thái cho cả Admin và Bác sĩ
+        const allowedStatuses = ALLOWED_TRANSITIONS[oldStatus] || [];
+
+        if (!allowedStatuses.includes(newStatus)) {
+            await connection.rollback();
+
+            return {
+                id,
+                oldStatus,
+                newStatus,
+                changed: false,
+                invalidTransition: true
+            };
+        }
+
+        // Cập nhật trạng thái và lịch sử
         await connection.execute(
             `
             UPDATE appointments
@@ -266,9 +268,9 @@ const updateAppointmentStatus = async (
     }
 };
 
-
 module.exports = {
     VALID_STATUSES,
+    ALLOWED_TRANSITIONS,
     getAppointments,
     getAppointmentById,
     updateAppointmentStatus

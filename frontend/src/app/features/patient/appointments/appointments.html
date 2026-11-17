@@ -1,0 +1,364 @@
+<div class="booking-container">
+
+  <!-- TIÊU ĐỀ -->
+  <div class="booking-title">
+    <h2>Đặt lịch khám</h2>
+    <p>Trang chủ &gt; Đặt lịch khám</p>
+  </div>
+
+  <!-- THANH TIẾN TRÌNH -->
+  <div class="progress-area">
+
+    <div
+      class="progress-step"
+      [class.completed]="currentStep >= 1"
+    >
+      <span class="step-number">1</span>
+      <span>Kiểm tra thông tin</span>
+    </div>
+
+    <div
+      class="progress-line"
+      [class.completed-line]="currentStep >= 2"
+    ></div>
+
+    <div
+      class="progress-step"
+      [class.completed]="currentStep >= 2"
+    >
+      <span class="step-number">2</span>
+      <span>Xác nhận</span>
+    </div>
+
+    <div
+      class="progress-line"
+      [class.completed-line]="currentStep >= 3"
+    ></div>
+
+    <div
+      class="progress-step"
+      [class.completed]="currentStep >= 3"
+    >
+      <span class="step-number">3</span>
+      <span>Hoàn tất</span>
+    </div>
+
+  </div>
+
+  <!-- THÔNG BÁO LỖI -->
+  <div
+    class="form-message error-message"
+    *ngIf="errorMessage"
+  >
+    {{ errorMessage }}
+  </div>
+
+  <!-- BƯỚC 1 -->
+  <div
+    class="booking-form"
+    *ngIf="currentStep === 1"
+  >
+
+    <div class="step-caption">
+      Kiểm tra thông tin
+    </div>
+
+    <h3>Thông tin đặt lịch khám</h3>
+
+    <div class="form-row three-columns">
+
+      <div class="form-group">
+        <label>Chuyên khoa*</label>
+
+        <select
+          [(ngModel)]="selectedSpecialtyId"
+          (change)="onSpecialtyChange()"
+        >
+          <option value="">Chọn chuyên khoa</option>
+
+          <option
+            *ngFor="let specialty of specialties"
+            [value]="specialty.id"
+          >
+            {{ specialty.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Bác sĩ*</label>
+
+        <select
+          [(ngModel)]="selectedDoctorId"
+          (change)="onDoctorChange()"
+        >
+          <option value="">Chọn bác sĩ</option>
+
+          <option
+            *ngFor="let doctor of doctors"
+            [value]="doctor.id"
+          >
+            {{ doctor.degree || 'BS.' }}
+            {{ doctor.full_name }}
+          </option>
+        </select>
+
+        <small class="loading-hint" *ngIf="loading">
+          Đang tải danh sách bác sĩ...
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Cơ sở khám*</label>
+
+        <input
+          type="text"
+          [value]="selectedDoctor?.work_address || ''"
+          placeholder="Chọn bác sĩ để xem cơ sở khám"
+          readonly
+        />
+      </div>
+
+    </div>
+
+    <!-- NGÀY KHÁM -->
+    <div class="form-row date-row">
+
+      <div class="form-group">
+        <label>Ngày khám*</label>
+
+        <input
+          type="date"
+          [(ngModel)]="selectedDate"
+          [min]="getMinDate()"
+          (change)="onDateChange()"
+          [disabled]="!selectedDoctorId"
+        />
+      </div>
+
+    </div>
+
+    <!-- LÝ DO KHÁM -->
+    <div class="form-group reason-group">
+
+      <label>Lý do khám</label>
+
+      <textarea
+        [(ngModel)]="reason"
+        maxlength="500"
+        placeholder="Nhập lý do (triệu chứng, nhu cầu khám,...)"
+      ></textarea>
+
+      <div class="character-count">
+        {{ reason.length }}/500
+      </div>
+
+    </div>
+
+    <!-- CHỌN KHUNG GIỜ -->
+    <div class="form-group slot-group">
+
+      <label>Chọn khung giờ khám*</label>
+
+      <div
+        class="slot-list"
+        *ngIf="availableSlots.length > 0"
+      >
+
+        <button
+          type="button"
+          class="slot-item"
+          *ngFor="let slot of availableSlots"
+          [class.selected]="isSlotSelected(slot.id)"
+          [disabled]="slot.remaining_capacity === 0 || slot.status === 'FULL' || slot.status === 'CANCELLED'"
+          (click)="selectSlot(slot)"
+        >
+          {{ getSlotTime(slot) }}
+
+          <small *ngIf="slot.remaining_capacity !== undefined">
+            Còn {{ slot.remaining_capacity }} chỗ
+          </small>
+        </button>
+
+      </div>
+
+      <p
+        class="empty-slots"
+        *ngIf="selectedDate && availableSlots.length === 0"
+      >
+        Không có khung giờ trống trong ngày đã chọn.
+      </p>
+
+      <p
+        class="slot-hint"
+        *ngIf="!selectedDate"
+      >
+        Vui lòng chọn bác sĩ và ngày khám để xem khung giờ.
+      </p>
+
+    </div>
+
+    <!-- NGƯỜI KHÁM -->
+    <div class="patient-choice">
+
+      <label>Chọn người khám</label>
+
+      <div class="patient-choice-card selected">
+
+        <span class="choice-dot"></span>
+
+        <div>
+          <strong>
+            {{ profile?.full_name || user?.full_name || 'Bệnh nhân' }}
+          </strong>
+
+          <small>
+            {{ profile?.phone || 'Chưa cập nhật số điện thoại' }}
+          </small>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- NÚT ĐIỀU HƯỚNG -->
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="goBack()"
+      >
+        Quay lại
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="continueToConfirmation()"
+      >
+        Tiếp tục →
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- BƯỚC 2 -->
+  <div
+    class="booking-form confirmation-form"
+    *ngIf="currentStep === 2"
+  >
+
+    <div class="step-caption">
+      Xác nhận thông tin
+    </div>
+
+    <h3>Kiểm tra lại lịch khám</h3>
+
+    <div class="confirmation-list">
+
+      <div class="confirmation-row">
+        <span>Người khám</span>
+        <strong>
+          {{ profile?.full_name || user?.full_name }}
+        </strong>
+      </div>
+
+      <div class="confirmation-row">
+        <span>Chuyên khoa</span>
+        <strong>{{ getSelectedSpecialtyName() }}</strong>
+      </div>
+
+      <div class="confirmation-row">
+        <span>Bác sĩ</span>
+        <strong>{{ selectedDoctor?.full_name }}</strong>
+      </div>
+
+      <div class="confirmation-row">
+        <span>Cơ sở khám</span>
+        <strong>
+          {{ selectedDoctor?.work_address || 'Chưa cập nhật' }}
+        </strong>
+      </div>
+
+      <div class="confirmation-row">
+        <span>Ngày khám</span>
+        <strong>{{ formatDate(selectedDate) }}</strong>
+      </div>
+
+      <div class="confirmation-row">
+        <span>Khung giờ</span>
+        <strong>
+          {{ selectedSlot ? getSlotTime(selectedSlot) : '' }}
+        </strong>
+      </div>
+
+      <div class="confirmation-row">
+        <span>Lý do khám</span>
+        <strong>{{ reason }}</strong>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="backToInformation()"
+      >
+        ← Quay lại
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        [disabled]="bookingLoading"
+        (click)="confirmBooking()"
+      >
+        {{ bookingLoading ? 'Đang xử lý...' : 'Xác nhận đặt lịch' }}
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- BƯỚC 3 -->
+  <div
+    class="booking-form completed-form"
+    *ngIf="currentStep === 3"
+  >
+
+    <div class="success-icon">✓</div>
+
+    <h2>Đặt lịch khám thành công!</h2>
+
+    <p>
+      {{ successMessage }}
+      Lịch khám của bạn đã được ghi nhận trên hệ thống.
+    </p>
+
+    <div class="form-actions center-actions">
+
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="finishBooking()"
+      >
+        Về trang chủ
+      </button>
+
+      <button
+        type="button"
+        class="primary-button"
+        (click)="goBack()"
+      >
+        Đóng
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
