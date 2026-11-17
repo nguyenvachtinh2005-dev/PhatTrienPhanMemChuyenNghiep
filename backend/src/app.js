@@ -1,15 +1,13 @@
-
 const express = require('express');
 const cors = require('cors');
 
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
 
 const app = express();
 
-// =====================================
-// MIDDLEWARE
-// =====================================
+// Cấu hình CORS
 app.use(cors({
     origin: 'http://localhost:4200',
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -18,9 +16,7 @@ app.use(cors({
 
 app.use(express.json());
 
-// =====================================
-// API KIỂM TRA BACKEND
-// =====================================
+// Kiểm tra backend
 app.get('/api/health', (req, res) => {
     res.status(200).json({
         success: true,
@@ -28,19 +24,12 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// =====================================
-// API XÁC THỰC
-// =====================================
+// Các API
 app.use('/api/auth', authRoutes);
-
-// =====================================
-// API QUẢN TRỊ VIÊN
-// =====================================
 app.use('/api/admin', adminRoutes);
+app.use('/api/doctor', doctorRoutes);
 
-// =====================================
-// API KHÔNG TỒN TẠI
-// =====================================
+// Middleware xử lý lỗi 404
 app.use((req, res) => {
     res.status(404).json({
         success: false,
@@ -48,9 +37,7 @@ app.use((req, res) => {
     });
 });
 
-// =====================================
-// XỬ LÝ LỖI
-// =====================================
+// Middleware xử lý lỗi máy chủ
 app.use((error, req, res, next) => {
     console.error('Server error:', error);
 

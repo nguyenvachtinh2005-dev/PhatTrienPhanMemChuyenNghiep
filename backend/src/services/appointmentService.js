@@ -147,7 +147,12 @@ const getAppointmentById = async (id) => {
 };
 
 // Cập nhật trạng thái lịch khám và ghi lịch sử
-const updateAppointmentStatus = async (id, newStatus) => {
+
+const updateAppointmentStatus = async (
+    id,
+    newStatus,
+    { doctorId = null, isDoctor = false } = {}
+) => {
     const connection = await db.getConnection();
 
     try {
@@ -155,7 +160,7 @@ const updateAppointmentStatus = async (id, newStatus) => {
 
         const [rows] = await connection.execute(
             `
-            SELECT id, status
+            SELECT id, doctor_id, status
             FROM appointments
             WHERE id = ?
             FOR UPDATE
@@ -168,9 +173,50 @@ const updateAppointmentStatus = async (id, newStatus) => {
             return null;
         }
 
-        const oldStatus = rows[0].status;
+        const appointment = rows[0];
+        const oldStatus = appointment.status;
 
-        // Không cần cập nhật nếu trạng thái không thay đổi
+        // Bác sĩ chỉ được thao tác lịch khám của chính mình
+        if (isDoctor && Number(appointment.doctor_id) !== Number(doctorId)) {
+            await connection.rollback();
+            return null;
+        }
+
+        // Đã hoàn thành thì không được thay đổi nữa
+        if (oldStatus === 'COMPLETED') {
+            await connection.rollback();
+
+            return {
+                id,
+                oldStatus,
+                newStatus,
+                changed: false,
+                locked: true
+            };
+        }
+
+        // Kiểm tra quy tắc chuyển trạng thái của bác sĩ
+        if (isDoctor) {
+            const allowedTransitions = {
+                PENDING: ['CONFIRMED', 'REJECTED'],
+                CONFIRMED: ['COMPLETED']
+            };
+
+            const allowed = allowedTransitions[oldStatus] || [];
+
+            if (!allowed.includes(newStatus)) {
+                await connection.rollback();
+
+                return {
+                    id,
+                    oldStatus,
+                    newStatus,
+                    changed: false,
+                    invalidTransition: true
+                };
+            }
+        }
+
         if (oldStatus === newStatus) {
             await connection.commit();
 
@@ -219,6 +265,7 @@ const updateAppointmentStatus = async (id, newStatus) => {
         connection.release();
     }
 };
+
 
 module.exports = {
     VALID_STATUSES,

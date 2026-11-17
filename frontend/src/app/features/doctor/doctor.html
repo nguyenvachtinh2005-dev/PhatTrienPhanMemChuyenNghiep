@@ -1,43 +1,318 @@
 
-<div class="dashboard-page">
+<div class="doctor-page">
 
-  <header class="dashboard-header">
-    <div class="brand">
-      <span class="brand-icon">✚</span>
-      <span>HealBooking BÁC SĨ</span>
-    </div>
+  <aside class="doctor-sidebar">
 
-    <div class="header-user">
-      <span>{{ user?.full_name }}</span>
-      <button class="logout-button" (click)="logout()">
-        Đăng xuất
-      </button>
-    </div>
-  </header>
+    <a routerLink="/doctor" class="sidebar-logo">
+      <span class="logo-icon">✚</span>
+      <span>HealBooking</span>
+    </a>
 
-  <main class="dashboard-content">
+    <nav class="sidebar-menu">
 
-    <section class="welcome">
-      <h1>Xin chào, Bác sĩ {{ user?.full_name }}!</h1>
-      <p>Chúc bạn có một ngày làm việc hiệu quả cùng HealBooking.</p>
-    </section>
+      <a
+        routerLink="/doctor"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="menu-item">
+        <span class="menu-icon">⌂</span>
+        <span>Trang chủ</span>
+      </a>
 
-    <section class="dashboard-section">
-      <h2>Chức năng dành cho bác sĩ</h2>
+      <a
+        routerLink="/doctor/appointments"
+        routerLinkActive="active"
+        class="menu-item">
+        <span class="menu-icon">▤</span>
+        <span>Lịch hẹn khám bệnh</span>
+      </a>
 
-      <div class="function-grid">
-        <div class="function-card" *ngFor="let item of functions">
-          <div class="function-icon">{{ item.icon }}</div>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.description }}</p>
-        </div>
+      <div
+        class="menu-item menu-disabled"
+        title="Chức năng đang được phát triển">
+        <span class="menu-icon">◉</span>
+        <span>Thông tin cá nhân</span>
       </div>
-    </section>
 
-  </main>
+      <div
+        class="menu-item menu-disabled"
+        title="Chức năng đang được phát triển">
+        <span class="menu-icon">◷</span>
+        <span>Quản lý lịch làm việc</span>
+      </div>
 
-  <footer class="dashboard-footer">
-    © 2026 HealBooking - Hệ thống đặt lịch khám bệnh trực tuyến
-  </footer>
+      <div
+        class="menu-item menu-disabled"
+        title="Chức năng đang được phát triển">
+        <span class="menu-icon">▣</span>
+        <span>Hồ sơ bệnh án</span>
+      </div>
+
+      <div
+        class="menu-item menu-disabled"
+        title="Chức năng đang được phát triển">
+        <span class="menu-icon">☆</span>
+        <span>Đánh giá</span>
+      </div>
+
+      <button
+        type="button"
+        class="menu-item logout-menu"
+        (click)="logout()">
+        <span class="menu-icon">⇥</span>
+        <span>Đăng xuất</span>
+      </button>
+
+    </nav>
+  </aside>
+
+  <div class="doctor-content">
+
+    <header class="doctor-topbar">
+
+      <div class="topbar-title">
+        <h1>
+          {{ isDashboard ? 'Tổng quan bác sĩ' : 'Lịch hẹn khám bệnh' }}
+        </h1>
+
+        <p>Chúc bạn một ngày làm việc hiệu quả!</p>
+      </div>
+
+      <div class="topbar-user">
+
+        <div class="user-avatar">
+          {{ user?.full_name?.charAt(0) || 'B' }}
+        </div>
+
+        <div class="user-information">
+          <strong>{{ user?.full_name || 'Bác sĩ' }}</strong>
+          <span>Bác sĩ</span>
+        </div>
+
+      </div>
+
+    </header>
+
+    <main class="doctor-main">
+
+      @if (isDashboard) {
+
+        @if (successMessage) {
+          <div class="success-message">
+            <span>✓</span>
+            {{ successMessage }}
+          </div>
+        }
+
+        <section class="welcome-section">
+
+          <div>
+            <h2>Xin chào, {{ user?.full_name || 'Bác sĩ' }}!</h2>
+
+            <p>
+              Chào mừng bạn đến với hệ thống quản lý bác sĩ HealBooking.
+            </p>
+          </div>
+
+          <div class="welcome-icon">🩺</div>
+
+        </section>
+
+        <!-- TỔNG QUAN LỊCH KHÁM -->
+
+        <section class="dashboard-section">
+
+          <div class="section-heading">
+
+            <div>
+              <h2 class="section-title">Tổng quan lịch khám</h2>
+
+              <p class="section-description">
+                Thống kê hoạt động khám bệnh của bạn
+              </p>
+            </div>
+
+            <button
+              class="refresh-button"
+              type="button"
+              (click)="refreshDashboard()">
+              ↻ Làm mới
+            </button>
+
+          </div>
+
+          @if (errorMessage) {
+            <div class="error-message">
+              {{ errorMessage }}
+            </div>
+          }
+
+          <!-- Luôn hiển thị thống kê, không chờ API -->
+
+          <div class="statistics-grid">
+
+            <div class="stat-card total-card">
+              <div class="stat-icon">📅</div>
+
+              <div>
+                <p>Tổng lịch hẹn</p>
+                <h3>{{ totalAppointments }}</h3>
+              </div>
+            </div>
+
+            <div class="stat-card pending-card">
+              <div class="stat-icon">⏳</div>
+
+              <div>
+                <p>Chờ xác nhận</p>
+                <h3>{{ pendingAppointments }}</h3>
+              </div>
+            </div>
+
+            <div class="stat-card confirmed-card">
+              <div class="stat-icon">✓</div>
+
+              <div>
+                <p>Đã xác nhận</p>
+                <h3>{{ confirmedAppointments }}</h3>
+              </div>
+            </div>
+
+            <div class="stat-card completed-card">
+              <div class="stat-icon">✔</div>
+
+              <div>
+                <p>Đã hoàn thành</p>
+                <h3>{{ completedAppointments }}</h3>
+              </div>
+            </div>
+
+            <div class="stat-card rejected-card">
+              <div class="stat-icon">✕</div>
+
+              <div>
+                <p>Đã từ chối</p>
+                <h3>{{ rejectedAppointments }}</h3>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- LỊCH HẸN SẮP TỚI -->
+
+        <section class="dashboard-section">
+
+          <div class="section-heading">
+
+            <div>
+              <h2 class="section-title">Lịch hẹn sắp tới</h2>
+
+              <p class="section-description">
+                Danh sách lịch khám của bệnh nhân
+              </p>
+            </div>
+
+            <a
+              routerLink="/doctor/appointments"
+              class="view-all-button">
+              Xem tất cả →
+            </a>
+
+          </div>
+
+          @if (upcomingAppointments.length === 0) {
+
+            <div class="empty-message">
+
+              <div class="empty-icon">📅</div>
+
+              <h3>
+                {{ dashboardLoaded
+                  ? 'Hiện chưa có lịch hẹn sắp tới'
+                  : 'Chưa có dữ liệu lịch hẹn' }}
+              </h3>
+
+              <p>
+                Các lịch hẹn sắp tới của bệnh nhân sẽ hiển thị tại đây.
+              </p>
+
+            </div>
+
+          } @else {
+
+            <div class="table-container">
+
+              <table class="appointment-table">
+
+                <thead>
+                  <tr>
+                    <th>Mã lịch hẹn</th>
+                    <th>Bệnh nhân</th>
+                    <th>Ngày khám</th>
+                    <th>Giờ khám</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+
+                  @for (
+                    appointment of upcomingAppointments;
+                    track appointment.id
+                  ) {
+
+                    <tr>
+
+                      <td>{{ appointment.id }}</td>
+
+                      <td class="patient-name">
+                        {{ appointment.patient_name }}
+                      </td>
+
+                      <td>
+                        {{ appointment.appointment_date | date:'dd/MM/yyyy' }}
+                      </td>
+
+                      <td>
+                        {{ getAppointmentStartTime(appointment) }}
+                        -
+                        {{ getAppointmentEndTime(appointment) }}
+                      </td>
+
+                      <td>
+                        <span
+                          class="status-badge"
+                          [ngClass]="getStatusClass(appointment.status)">
+                          {{ getStatusText(appointment.status) }}
+                        </span>
+                      </td>
+
+                    </tr>
+
+                  }
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          }
+
+        </section>
+
+      }
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+    <footer class="doctor-footer">
+      Dự án HealBooking - Đặt lịch khám trực tuyến
+    </footer>
+
+  </div>
 
 </div>

@@ -128,6 +128,12 @@ const changeAppointmentStatus = async (req, res) => {
                 message: 'Không tìm thấy lịch khám'
             });
         }
+        if (result.locked) {
+            return res.status(409).json({
+                success: false,
+                message: 'Lịch khám đã hoàn thành, không thể thay đổi trạng thái'
+            });
+        }
 
         return res.status(200).json({
             success: true,

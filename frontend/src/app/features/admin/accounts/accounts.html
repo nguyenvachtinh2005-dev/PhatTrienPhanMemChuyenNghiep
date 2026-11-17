@@ -276,10 +276,6 @@
           <p>{{ getStatusLabel(selectedAccount.account_status) }}</p>
         </div>
 
-        <div class="detail-item" *ngIf="selectedAccount.created_at">
-          <label>Ngày tạo tài khoản</label>
-          <p>{{ selectedAccount.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
-        </div>
 
       </div>
       <div class="modal-footer">

@@ -19,7 +19,6 @@ interface Account {
   phone: string | null;
   role: 'PATIENT' | 'DOCTOR' | 'ADMIN';
   account_status: string;
-  created_at?: string;
 }
 
 interface ApiResponse {

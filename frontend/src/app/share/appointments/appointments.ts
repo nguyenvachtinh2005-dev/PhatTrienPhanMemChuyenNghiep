@@ -23,7 +23,7 @@ import {
   takeUntil
 } from 'rxjs';
 
-import { AuthService } from '../../../core/services/auth.service';
+import { AuthService } from '../../core/services/auth.service';
 
 interface Appointment {
   id: number;
@@ -81,10 +81,12 @@ interface ApiResponse<T> {
   templateUrl: './appointments.html',
   styleUrl: './appointments.css'
 })
-export class AppointmentsComponent implements OnInit, OnDestroy {
+export class Appointments implements OnInit, OnDestroy {
 
-  private readonly apiUrl =
-    'http://localhost:3001/api/admin/appointments';
+  private readonly API_BASE_URL = 'http://localhost:3001/api';
+
+  private apiUrl = '';
+  private userRole: string | null = null;
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
@@ -92,25 +94,20 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   private listSubscription?: Subscription;
   private detailSubscription?: Subscription;
 
-  // Danh sách lịch khám
   appointments: Appointment[] = [];
 
-  // Lịch khám đang xem chi tiết
   selectedAppointment: Appointment | null = null;
 
-  // Bộ lọc
   searchText = '';
   selectedStatus = '';
   selectedDate = '';
 
-  // Phân trang
   currentPage = 1;
   pageSize = 10;
 
   totalAppointments = 0;
   totalPages = 0;
 
-  // Trạng thái giao diện
   isLoading = false;
   isUpdating = false;
   showDetailModal = false;
@@ -118,7 +115,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   errorMessage = '';
   successMessage = '';
 
-  // Các trạng thái lịch khám
   readonly statusOptions = [
     { value: 'PENDING', label: 'Chờ xác nhận' },
     { value: 'CONFIRMED', label: 'Đã xác nhận' },
@@ -133,8 +129,30 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
-  // Khởi tạo component
+  // Khởi tạo component và chọn API theo vai trò
   ngOnInit(): void {
+
+    const user = this.authService.getUser();
+
+    this.userRole = user?.role || null;
+
+    if (this.userRole === 'ADMIN') {
+
+      this.apiUrl =
+        `${this.API_BASE_URL}/admin/appointments`;
+
+    } else if (this.userRole === 'DOCTOR') {
+
+      this.apiUrl =
+        `${this.API_BASE_URL}/doctor/appointments`;
+
+    } else {
+
+      this.errorMessage =
+        'Bạn không có quyền thực hiện chức năng này';
+
+      return;
+    }
 
     this.searchSubject.pipe(
       debounceTime(400),
@@ -190,6 +208,12 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
   // Lấy danh sách lịch khám
   loadAppointments(): void {
 
+    if (!this.apiUrl) {
+      this.errorMessage =
+        'Không xác định được API lịch khám theo vai trò tài khoản.';
+      return;
+    }
+
     this.listSubscription?.unsubscribe();
 
     this.isLoading = true;
@@ -233,7 +257,15 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
         this.isLoading = false;
 
         console.log(
-          `[Appointments] Tải danh sách: ${Date.now() - startTime}ms`
+          `[Appointments] Vai trò: ${this.userRole}`
+        );
+
+        console.log(
+          `[Appointments] API: ${this.apiUrl}`
+        );
+
+        console.log(
+          `[Appointments] Thời gian tải: ${Date.now() - startTime}ms`
         );
 
         console.log(
@@ -449,7 +481,6 @@ export class AppointmentsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Không cho sửa lịch khám đã hoàn thành
     if (this.isCompleted(this.selectedAppointment)) {
 
       this.errorMessage =

@@ -1,83 +1,98 @@
 
 import { Routes } from '@angular/router';
 
+// Các component xác thực
 import { LoginComponent } from './features/login.component/login.component';
 import { RegisterComponent } from './features/register.component/register.component';
 
+// Các component theo vai trò
 import { Admin } from './features/admin/admin';
 import { DoctorComponent } from './features/doctor/doctor';
 import { PatientComponent } from './features/patient/patient';
 
+// Guard phân quyền
 import { roleGuard } from './core/guards/role';
 
+// Chức năng Admin
 import { AccountComponent } from './features/admin/accounts/accounts';
 
-import { AppointmentsComponent } from './features/admin/appointments/appointments';
+// Component lịch hẹn dùng chung cho Admin và Doctor
+import { Appointments } from './share/appointments/appointments';
 
 export const routes: Routes = [
 
+  // Trang mặc định
   {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
   },
 
-  // ĐĂNG NHẬP
+  // Đăng nhập
   {
     path: 'login',
     component: LoginComponent
   },
 
-  // ĐĂNG KÝ
+  // Đăng ký
   {
     path: 'register',
     component: RegisterComponent
   },
 
+  // Đăng ký bệnh nhân
   {
     path: 'register/patient',
     component: RegisterComponent,
     data: { role: 'PATIENT' }
   },
 
+  // Đăng ký bác sĩ
   {
     path: 'register/doctor',
     component: RegisterComponent,
     data: { role: 'DOCTOR' }
   },
 
-  // ADMIN VÀ CÁC CHỨC NĂNG CON
+  // =========================
+  // ADMIN
+  // =========================
   {
     path: 'admin',
     component: Admin,
     canActivate: [roleGuard],
     data: { roles: ['ADMIN'] },
-
     children: [
-
-      // Quản lý tài khoản
       {
         path: 'accounts',
         component: AccountComponent
       },
-      // quản lý lịch khám
       {
         path: 'appointments',
-        component: AppointmentsComponent
-      },
-
+        component: Appointments
+      }
     ]
   },
 
-  // BÁC SĨ
+  // =========================
+  // DOCTOR
+  // =========================
   {
     path: 'doctor',
     component: DoctorComponent,
     canActivate: [roleGuard],
-    data: { roles: ['DOCTOR'] }
+    data: { roles: ['DOCTOR'] },
+    children: [
+      {
+        path: 'appointments',
+        component: Appointments
+      }
+    ]
   },
 
-  // BỆNH NHÂN
+  // =========================
+  // PATIENT
+  // =========================
   {
     path: 'patient',
     component: PatientComponent,
@@ -85,7 +100,7 @@ export const routes: Routes = [
     data: { roles: ['PATIENT'] }
   },
 
-  // ĐƯỜNG DẪN KHÔNG TỒN TẠI
+  // Không tìm thấy đường dẫn
   {
     path: '**',
     redirectTo: 'login'
