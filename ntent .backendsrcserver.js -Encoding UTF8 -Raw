@@ -1,0 +1,41 @@
+[1mdiff --cc backend/src/server.js[m
+[1mindex 8ffdd57,d0e1784..0000000[m
+[1m--- a/backend/src/server.js[m
+[1m+++ b/backend/src/server.js[m
+[36m@@@ -4,6 -5,32 +4,6 @@@[m [mconst app = require("./app")[m
+  [m
+  const PORT = process.env.PORT || 3001;[m
+  [m
+[31m -async function startServer() {[m
+[31m -    try {[m
+[31m -        // Kiểm tra cấu hình JWT[m
+[31m -        if (!process.env.JWT_SECRET) {[m
+[31m -            throw new Error('Chưa cấu hình JWT_SECRET trong file .env');[m
+[31m -        }[m
+[31m -[m
+[31m -        // Kiểm tra kết nối MySQL[m
+[31m -        const { poolPromise } = require('./config/db');[m
+[31m -[m
+[31m -// Kiểm tra kết nối trong startServer()[m
+[31m -await poolPromise;[m
+[31m -[m
+[31m -        // Khởi động Server[m
+[31m -        app.listen(PORT, () => {[m
+[31m -            console.log('================================');[m
+[31m -            console.log('HealBooking Backend đang chạy');[m
+[31m -            console.log(`URL: http://localhost:${PORT}`);[m
+[31m -            console.log(`Health: http://localhost:${PORT}/api/health`);[m
+[31m -            console.log('================================');[m
+[31m -        });[m
+[31m -[m
+[31m -    } catch (error) {[m
+[31m -        console.error('Không thể khởi động Backend:', error.message);[m
+[31m -        process.exit(1);[m
+[31m -    }[m
+[31m -}[m
+[31m -[m
+[31m -startServer();[m
+[32m +app.listen(PORT, () => {[m
+[32m +    console.log(`HealBooking Server running at http://localhost:${PORT}`);[m
+[31m- });[m
+[32m++});[m
